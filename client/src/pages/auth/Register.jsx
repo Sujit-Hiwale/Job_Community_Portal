@@ -12,7 +12,8 @@ function Register() {
     role: '',
     position: '',
     experience: '',
-    certification: '',
+    cvFile: null,
+    certificationFile: null,
     acceptTerms: false
   })
   
@@ -29,6 +30,37 @@ function Register() {
     // Clear error for this field when user starts typing
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }))
+    }
+  }
+
+  const handleFileChange = (e) => {
+    const { name, files } = e.target
+    const file = files[0]
+    
+    if (file) {
+      // Validate file type for certification (only PDF)
+      if (name === 'certificationFile' && file.type !== 'application/pdf') {
+        setErrors(prev => ({ ...prev, [name]: 'Only PDF files are allowed for certification' }))
+        e.target.value = '' // Clear the file input
+        return
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setErrors(prev => ({ ...prev, [name]: 'File size must be less than 5MB' }))
+        e.target.value = '' // Clear the file input
+        return
+      }
+      
+      setFormData(prev => ({
+        ...prev,
+        [name]: file
+      }))
+      
+      // Clear error for this field
+      if (errors[name]) {
+        setErrors(prev => ({ ...prev, [name]: '' }))
+      }
     }
   }
 
@@ -55,7 +87,8 @@ function Register() {
     if (!formData.role) newErrors.role = 'Please select a role'
     if (!formData.position.trim()) newErrors.position = 'Position is required'
     if (!formData.experience.trim()) newErrors.experience = 'Experience is required'
-    if (!formData.certification.trim()) newErrors.certification = 'Certification is required'
+    if (!formData.cvFile) newErrors.cvFile = 'CV upload is required'
+    if (!formData.certificationFile) newErrors.certificationFile = 'Certification document is required'
     if (!formData.acceptTerms) newErrors.acceptTerms = 'You must accept terms and conditions'
     
     return newErrors
@@ -93,9 +126,13 @@ function Register() {
         role: '',
         position: '',
         experience: '',
-        certification: '',
+        cvFile: null,
+        certificationFile: null,
         acceptTerms: false
       })
+      // Reset file inputs
+      const fileInputs = document.querySelectorAll('input[type="file"]')
+      fileInputs.forEach(input => input.value = '')
       setErrors({})
     } catch (error) {
       setErrors({ submit: error.response?.data?.message || 'Registration failed. Please try again.' })
@@ -254,19 +291,41 @@ function Register() {
           </div>
           
           <div>
-            <label htmlFor="certification" className="block text-sm font-medium text-gray-700 mb-1">
-              Certification <span className="text-red-500">*</span>
+            <label htmlFor="cvFile" className="block text-sm font-medium text-gray-700 mb-1">
+              Upload CV <span className="text-red-500">*</span>
             </label>
             <input
-              type="text"
-              id="certification"
-              name="certification"
-              value={formData.certification}
-              onChange={handleChange}
-              className={`w-full px-3 py-2 border ${errors.certification ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
-              placeholder="e.g., AWS Certified, PMP, None"
+              type="file"
+              id="cvFile"
+              name="cvFile"
+              onChange={handleFileChange}
+              accept=".pdf,.doc,.docx"
+              className={`w-full px-3 py-2 border ${errors.cvFile ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100`}
             />
-            {errors.certification && <p className="mt-1 text-sm text-red-500">{errors.certification}</p>}
+            <p className="mt-1 text-xs text-gray-500">Accepted formats: PDF, DOC, DOCX (Max 5MB)</p>
+            {errors.cvFile && <p className="mt-1 text-sm text-red-500">{errors.cvFile}</p>}
+            {formData.cvFile && (
+              <p className="mt-1 text-sm text-green-600">✓ {formData.cvFile.name}</p>
+            )}
+          </div>
+          
+          <div>
+            <label htmlFor="certificationFile" className="block text-sm font-medium text-gray-700 mb-1">
+              Upload Certification Document <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="file"
+              id="certificationFile"
+              name="certificationFile"
+              onChange={handleFileChange}
+              accept=".pdf"
+              className={`w-full px-3 py-2 border ${errors.certificationFile ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100`}
+            />
+            <p className="mt-1 text-xs text-gray-500">Only PDF format accepted (Max 5MB)</p>
+            {errors.certificationFile && <p className="mt-1 text-sm text-red-500">{errors.certificationFile}</p>}
+            {formData.certificationFile && (
+              <p className="mt-1 text-sm text-green-600">✓ {formData.certificationFile.name}</p>
+            )}
           </div>
           
           <div className="flex items-start">
