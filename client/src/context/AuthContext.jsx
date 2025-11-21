@@ -1,98 +1,107 @@
-import { createContext, useContext, useState, useEffect } from 'react'
-import { auth, db } from '../firebase/firebaseConfig'
-import { 
-  onAuthStateChanged, 
-  signInWithEmailAndPassword,
+import { createContext, useContext, useEffect, useState } from "react";
+import { auth, db } from "../firebase/firebaseConfig";
+import {
+  onAuthStateChanged,
   createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
   signOut as firebaseSignOut,
-  updateProfile
-} from 'firebase/auth'
-import { doc, getDoc, setDoc } from 'firebase/firestore'
+  updateProfile,
+} from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
-const AuthContext = createContext()
+const AuthContext = createContext();
 
 export function useAuth() {
-  return useContext(AuthContext)
+  return useContext(AuthContext);
 }
 
 export function AuthProvider({ children }) {
-  const [currentUser, setCurrentUser] = useState(null)
-  const [userRole, setUserRole] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [currentUser, setCurrentUser] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [userRole, setUserRole] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Determine user role based on email or Firestore data
-  const getUserRole = async (user) => {
+  // Load user profile from Firestore
+  const loadUserProfile = async (uid) => {
     try {
-      // Try to get role from Firestore
-      const userDoc = await getDoc(doc(db, 'users', user.uid))
-      if (userDoc.exists()) {
-        return userDoc.data().role
-      }
-      
-      // Fallback: determine role based on email
-      const email = user.email.toLowerCase()
-      if (email.includes('company') || email.includes('corp')) {
-        return 'company'
-      } else if (email.includes('recruiter') || email.includes('hr')) {
-        return 'recruiter'
-      }
-      return 'user'
-    } catch (error) {
-      console.error('Error getting user role:', error)
-      return 'user'
-    }
-  }
+      const userDoc = await getDoc(doc(db, "users", uid));
 
+      if (userDoc.exists()) {
+        const data = userDoc.data();
+        setProfile(data);
+        setUserRole(data.role);
+      } else {
+        setProfile(null);
+        setUserRole(null);
+      }
+    } catch (error) {
+      console.error("Error loading user profile:", error);
+    }
+  };
+
+  // Auth state observer
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setCurrentUser(user)
+      setCurrentUser(user);
+
       if (user) {
-        const role = await getUserRole(user)
-        setUserRole(role)
+        await loadUserProfile(user.uid);
       } else {
-        setUserRole(null)
+        setProfile(null);
+        setUserRole(null);
       }
-      setLoading(false)
-    })
 
-    return unsubscribe
-  }, [])
+      setLoading(false);
+    });
 
-  const signUp = async (email, password, displayName, role = 'user') => {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-    await updateProfile(userCredential.user, { displayName })
-    
-    // Save user role to Firestore
-    await setDoc(doc(db, 'users', userCredential.user.uid), {
+    return unsubscribe;
+  }, []);
+
+  // Sign up user + create Firestore profile
+  const signUp = async (email, password, name, role = "user") => {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+
+    await updateProfile(userCredential.user, { displayName: name });
+
+    // Save to Firestore
+    await setDoc(doc(db, "users", userCredential.user.uid), {
+      uid: userCredential.user.uid,
       email,
-      displayName,
+      name,
       role,
-      createdAt: new Date()
-    })
-    
-    return userCredential
-  }
+      createdAt: new Date(),
+    });
 
+    await loadUserProfile(userCredential.user.uid);
+
+    return userCredential;
+  };
+
+  // Login
   const signIn = async (email, password) => {
-    return signInWithEmailAndPassword(auth, email, password)
-  }
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    await loadUserProfile(userCredential.user.uid);
+    return userCredential;
+  };
 
+  // Logout
   const signOut = async () => {
-    return firebaseSignOut(auth)
-  }
+    await firebaseSignOut(auth);
+    setProfile(null);
+    setUserRole(null);
+  };
 
   const value = {
     currentUser,
+    profile,
     userRole,
     signUp,
     signIn,
     signOut,
-    canEditBlog: () => userRole === 'company' || userRole === 'recruiter'
-  }
+    isJobSeeker: () => userRole === "job-seeker",
+    isCompany: () => userRole === "company",
+    isRecruiter: () => userRole === "recruiter",
+  };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {!loading && children}
-    </AuthContext.Provider>
-  )
+  return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
 }

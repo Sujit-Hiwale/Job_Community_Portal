@@ -2,13 +2,16 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import Home from './pages/Home'
-import Blog from './pages/Blog'
+import Blog from './components/Blog/Blog'
+import CreateBlog from './components/Blog/CreateBlog'
 import Services from './pages/Services'
 import Jobs from './pages/Jobs'
 import BookMeeting from './pages/BookMeeting'
 import Profile from './pages/Profile'
 import Register from './pages/auth/Register'
 import Login from './pages/auth/Login'
+import BlogList from "./components/Blog/BlogList";
+import BlogDetails from "./components/Blog/BlogDetails";
 
 function App() {
   return (
@@ -19,7 +22,9 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/jobs" element={<Jobs />} />
-            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog" element={<BlogList />} />
+            <Route path="/blog/:id" element={<BlogDetails />} />
+            <Route path="/create-blog" element={<CreateBlog />} />
             <Route path="/services" element={<Services />} />
             <Route path="/book-meeting" element={<BookMeeting />} />
             <Route path="/profile" element={<Profile />} />

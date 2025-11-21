@@ -198,6 +198,64 @@ app.post("/create-meeting", async (req, res) => {
   }
 });
 
+app.get("/blogs", async (req, res) => {
+  try {
+    const snapshot = await db.collection("blogs").orderBy("createdAt", "desc").get();
+
+    const blogs = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    return res.json({ blogs });
+  } catch (error) {
+    console.error("Error fetching blogs:", error);
+    res.status(500).json({ error: "Failed to load blogs" });
+  }
+});
+
+app.post("/blogs", async (req, res) => {
+  const token = req.headers.authorization?.split("Bearer ")[1];
+  if (!token)
+    return res.status(401).json({ error: "Unauthorized - No token" });
+
+  try {
+    const decoded = await admin.auth().verifyIdToken(token);
+    const uid = decoded.uid;
+
+    // Fetch user profile
+    const userDoc = await db.collection("users").doc(uid).get();
+    if (!userDoc.exists)
+      return res.status(404).json({ error: "User profile not found" });
+
+    const user = userDoc.data();
+
+    if (user.role !== "job-seeker")
+      return res.status(403).json({ error: "Only job-seekers can create blogs" });
+
+    // Blog payload
+    const { title, content } = req.body;
+
+    const newBlog = {
+      title,
+      content,
+      authorId: uid,
+      authorName: user.name,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    };
+
+    const docRef = await db.collection("blogs").add(newBlog);
+
+    return res.json({
+      message: "Blog created successfully",
+      id: docRef.id,
+    });
+  } catch (error) {
+    console.error("Error creating blog:", error);
+    res.status(500).json({ error: "Failed to create blog" });
+  }
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
   
