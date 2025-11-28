@@ -19,7 +19,7 @@ import AdminPage from './admin/AdminPage';
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex flex-col">
         <Header />
         <main className="flex-grow">
           <Routes>

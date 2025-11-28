@@ -3,7 +3,6 @@ import { Search, Briefcase, Building2, Users, ArrowRight } from "lucide-react";
 
 export default function Home() {
   const [search, setSearch] = useState({ role: "", location: "" });
-  const [dark, setDark] = useState(false);
 
   const categories = [
     "Software Development",
@@ -17,19 +16,9 @@ export default function Home() {
   ];
 
   return (
-    <div className={dark ? "dark w-full" : "w-full"}>
+    <div className="w-full">
       <div className="dark:bg-gray-900 dark:text-white w-full min-h-screen transition duration-300">
         
-        {/* ================= TOGGLE DARK MODE ================= */}
-        <div className="flex justify-end p-4">
-          <button
-            onClick={() => setDark(!dark)}
-            className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
-          >
-            {dark ? "Light Mode" : "Dark Mode"}
-          </button>
-        </div>
-
         {/* ================= HERO SECTION ================= */}
         <section className="
           bg-blue-50 dark:bg-gray-800

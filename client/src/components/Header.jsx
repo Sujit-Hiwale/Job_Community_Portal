@@ -1,19 +1,21 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Sun, Moon } from "lucide-react";
 
 function Header() {
   const { currentUser } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <header className="bg-white shadow-md">
+    <header className="bg-white dark:bg-gray-900 shadow-md">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
 
           {/* Logo */}
-          <Link to="/" className="text-2xl font-bold text-blue-600">
+          <Link to="/" className="text-2xl font-bold text-blue-600 dark:text-blue-400">
             Job Portal
           </Link>
 
@@ -21,35 +23,35 @@ function Header() {
           <div className="hidden md:flex items-center space-x-8">
             <Link
               to="/"
-              className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition"
+              className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 text-sm font-medium transition"
             >
               Home
             </Link>
 
             <Link
               to="/jobs"
-              className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition"
+              className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 text-sm font-medium transition"
             >
               Jobs
             </Link>
 
             <Link
               to="/blog"
-              className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition"
+              className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 text-sm font-medium transition"
             >
               Blog
             </Link>
 
             <Link
               to="/services"
-              className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition"
+              className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 text-sm font-medium transition"
             >
               Services
             </Link>
 
             <Link
               to="/book-meeting"
-              className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition flex items-center gap-1"
+              className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 text-sm font-medium transition flex items-center gap-1"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -65,7 +67,7 @@ function Header() {
             {/* Profile Button */}
             <Link
               to="/profile"
-              className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium transition flex items-center gap-2"
+              className="bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 px-4 py-2 rounded-md text-sm font-medium transition flex items-center gap-2"
             >
               {currentUser ? (
                 <>
@@ -93,11 +95,19 @@ function Header() {
                 </>
               )}
             </Link>
+
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 p-2 rounded-md transition"
+            >
+              {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+            </button>
           </div>
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden text-gray-700"
+            className="md:hidden text-gray-700 dark:text-gray-300"
             onClick={() => setMenuOpen(!menuOpen)}
           >
             {menuOpen ? <X size={28} /> : <Menu size={28} />}
@@ -111,7 +121,7 @@ function Header() {
             <Link
               to="/"
               onClick={() => setMenuOpen(false)}
-              className="text-gray-700 hover:text-blue-600 px-3"
+              className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3"
             >
               Home
             </Link>
@@ -119,7 +129,7 @@ function Header() {
             <Link
               to="/jobs"
               onClick={() => setMenuOpen(false)}
-              className="text-gray-700 hover:text-blue-600 px-3"
+              className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3"
             >
               Jobs
             </Link>
@@ -127,7 +137,7 @@ function Header() {
             <Link
               to="/blog"
               onClick={() => setMenuOpen(false)}
-              className="text-gray-700 hover:text-blue-600 px-3"
+              className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3"
             >
               Blog
             </Link>
@@ -135,7 +145,7 @@ function Header() {
             <Link
               to="/services"
               onClick={() => setMenuOpen(false)}
-              className="text-gray-700 hover:text-blue-600 px-3"
+              className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3"
             >
               Services
             </Link>
@@ -143,7 +153,7 @@ function Header() {
             <Link
               to="/book-meeting"
               onClick={() => setMenuOpen(false)}
-              className="text-gray-700 hover:text-blue-600 px-3 flex items-center gap-2"
+              className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 flex items-center gap-2"
             >
               Book Meeting
             </Link>
@@ -151,10 +161,19 @@ function Header() {
             <Link
               to="/profile"
               onClick={() => setMenuOpen(false)}
-              className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-md w-fit"
+              className="bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 px-4 py-2 rounded-md w-fit"
             >
               {currentUser ? "Profile" : "Login"}
             </Link>
+
+            {/* Theme Toggle Mobile */}
+            <button
+              onClick={toggleTheme}
+              className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md transition flex items-center gap-2"
+            >
+              {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+              {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
+            </button>
 
           </div>
         )}

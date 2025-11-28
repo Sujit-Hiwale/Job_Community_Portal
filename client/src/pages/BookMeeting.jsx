@@ -62,7 +62,7 @@ function BookMeeting() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 py-12 text-gray-900 dark:text-gray-100">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <div className="text-center mb-12">
@@ -73,12 +73,12 @@ function BookMeeting() {
               </svg>
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Book a Meeting</h1>
-          <p className="text-xl text-gray-600 mb-2">Schedule a Zoom meeting with our team</p>
-          <p className="text-sm text-gray-500">We'll send you a Zoom link via email</p>
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Book a Meeting</h1>
+          <p className="text-xl text-gray-600 dark:text-gray-300 mb-2">Schedule a Zoom meeting with our team</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">We'll send you a Zoom link via email</p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className="bg-white dark:bg-gray-700 rounded-xl shadow-lg overflow-hidden">
           <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6">
             <h2 className="text-2xl font-bold text-white flex items-center gap-2">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -90,14 +90,14 @@ function BookMeeting() {
 
           <form onSubmit={handleSubmit} className="p-8 space-y-6">
             {success && (
-              <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-6 animate-pulse">
+              <div className="bg-green-50 dark:bg-green-900 border-l-4 border-green-500 p-4 mb-6 animate-pulse">
                 <div className="flex items-center">
                   <svg className="w-6 h-6 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <div>
-                    <h3 className="text-green-800 font-semibold">Meeting Scheduled Successfully!</h3>
-                    <p className="text-green-700 text-sm">Check your email for the Zoom meeting link.</p>
+                    <h3 className="text-green-800 dark:text-green-200 font-semibold">Meeting Scheduled Successfully!</h3>
+                    <p className="text-green-700 dark:text-green-300 text-sm">Check your email for the Zoom meeting link.</p>
                   </div>
                 </div>
               </div>
@@ -110,7 +110,7 @@ function BookMeeting() {
                 required
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
                 placeholder="Full Name"
               />
 
@@ -120,7 +120,7 @@ function BookMeeting() {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
                 placeholder="Email Address"
               />
 
@@ -130,7 +130,7 @@ function BookMeeting() {
                 required
                 value={formData.phone}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
                 placeholder="Phone Number"
               />
 
@@ -139,7 +139,7 @@ function BookMeeting() {
                 required
                 value={formData.purpose}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
               >
                 <option value="">Select purpose</option>
                 {purposes.map((p) => (
@@ -154,7 +154,7 @@ function BookMeeting() {
                 value={formData.date}
                 onChange={handleChange}
                 min={new Date().toISOString().split('T')[0]}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
               />
 
               <input
@@ -163,7 +163,7 @@ function BookMeeting() {
                 required
                 value={formData.time}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
               />
             </div>
 
@@ -172,7 +172,7 @@ function BookMeeting() {
               rows="4"
               value={formData.message}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
               placeholder="Additional message"
             />
 
@@ -191,28 +191,28 @@ function BookMeeting() {
         </div>
 
         <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-lg p-6 shadow-md text-center">
-            <div className="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="bg-white dark:bg-gray-700 rounded-lg p-6 shadow-md text-center">
+            <div className="bg-green-100 dark:bg-green-900 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
               ✓
             </div>
-            <h3 className="font-semibold text-gray-900 mb-2">Instant Confirmation</h3>
-            <p className="text-sm text-gray-600">Get meeting confirmation immediately</p>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Instant Confirmation</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300">Get meeting confirmation immediately</p>
           </div>
 
-          <div className="bg-white rounded-lg p-6 shadow-md text-center">
-            <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="bg-white dark:bg-gray-700 rounded-lg p-6 shadow-md text-center">
+            <div className="bg-blue-100 dark:bg-blue-900 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
               🔒
             </div>
-            <h3 className="font-semibold text-gray-900 mb-2">Secure & Private</h3>
-            <p className="text-sm text-gray-600">End-to-end encrypted meetings</p>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Secure & Private</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300">End-to-end encrypted meetings</p>
           </div>
 
-          <div className="bg-white rounded-lg p-6 shadow-md text-center">
-            <div className="bg-purple-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="bg-white dark:bg-gray-700 rounded-lg p-6 shadow-md text-center">
+            <div className="bg-purple-100 dark:bg-purple-900 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
               ⏰
             </div>
-            <h3 className="font-semibold text-gray-900 mb-2">Flexible Scheduling</h3>
-            <p className="text-sm text-gray-600">Choose your convenient time</p>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Flexible Scheduling</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300">Choose your convenient time</p>
           </div>
         </div>
       </div>
