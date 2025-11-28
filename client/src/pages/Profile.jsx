@@ -242,48 +242,48 @@ function Profile() {
       <div className="max-w-4xl mx-auto">
         {/* Header Card */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden mb-6">
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 h-32"></div>
-          <div className="px-8 pb-8">
-            <div className="flex items-end justify-between -mt-16 mb-6">
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 h-28"></div>
+          <div className="px-6 pb-8">
+            <div className="-mt-16 mb-6 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
               <div className="flex items-end gap-4">
-                <div className="w-32 h-32 bg-white rounded-full border-4 border-white shadow-lg flex items-center justify-center">
+                <div className="w-32 h-32 bg-white dark:bg-gray-700 rounded-full ring-4 ring-white dark:ring-gray-800 shadow-lg flex items-center justify-center">
                   <svg className="w-16 h-16 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
                 <div className="mb-2">
-                  <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                  <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
                     {userData?.name || currentUser.displayName || 'User'}
                   </h1>
-                  <div className="flex items-center gap-2 mt-1">
+                  <div className="flex items-center gap-2 mt-2 flex-wrap">
                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                      userRole === 'company' ? 'bg-blue-100 text-blue-800' :
-                      userRole === 'recruiter' ? 'bg-green-100 text-green-800' :
-                      'bg-gray-100 text-gray-800'
+                      userRole === 'company' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                      userRole === 'recruiter' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                      'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
                     }`}>
                       {userRole === 'job-seeker' ? '👤 Job Seeker' :
                        userRole === 'recruiter' ? '🎯 Recruiter' :
                        userRole === 'company' ? '🏢 Company' : '👤 User'}
                     </span>
                     {currentUser.emailVerified && (
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                         ✓ Verified
                       </span>
                     )}
                   </div>
                 </div>
               </div>
-              <div className="flex gap-3">
+              <div className="flex items-center gap-3">
                 <button
                   onClick={openEdit}
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition font-medium shadow-md hover:shadow-lg flex items-center gap-2"
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition font-medium shadow-md hover:shadow-lg"
                 >
                   Edit Profile
                 </button>
 
                 <button
                   onClick={handleLogout}
-                  className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition font-medium shadow-md hover:shadow-lg flex items-center gap-2"
+                  className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition font-medium shadow-md hover:shadow-lg"
                 >
                   Logout
                 </button>
@@ -325,8 +325,8 @@ function Profile() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                   </svg>
                   <div>
-                    <p className="text-sm text-gray-500 font-medium">Mobile</p>
-                    <p className="text-gray-900">{userData.mobile || '—'}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-300 font-medium">Mobile</p>
+                    <p className="text-gray-900 dark:text-gray-100">{userData.mobile || '—'}</p>
                   </div>
                 </div>
               )}
@@ -338,8 +338,8 @@ function Profile() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                   <div>
-                    <p className="text-sm text-gray-500 font-medium">Address</p>
-                    <p className="text-gray-900">{userData.address || '—'}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-300 font-medium">Address</p>
+                    <p className="text-gray-900 dark:text-gray-100">{userData.address || '—'}</p>
                   </div>
                 </div>
               )}
@@ -347,8 +347,8 @@ function Profile() {
           </div>
 
           {/* Professional Information Card */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
               <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
@@ -400,8 +400,8 @@ function Profile() {
 
         {/* Documents Card */}
         {(userData?.cvUrl || userData?.certificatesUrl) && (
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
               <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
@@ -413,7 +413,7 @@ function Profile() {
                   href={userData.cvUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-4 border-2 border-blue-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition group"
+                  className="flex items-center gap-3 p-4 border-2 border-blue-200 dark:border-blue-800 rounded-lg hover:border-blue-400 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-gray-700 transition group"
                 >
                   <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition">
                     <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -421,8 +421,8 @@ function Profile() {
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <p className="font-semibold text-gray-900">CV / Resume</p>
-                    <p className="text-sm text-gray-500">Click to download</p>
+                    <p className="font-semibold text-gray-900 dark:text-gray-100">CV / Resume</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-300">Click to download</p>
                   </div>
                   <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -435,7 +435,7 @@ function Profile() {
                   href={userData.certificatesUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-4 border-2 border-green-200 rounded-lg hover:border-green-400 hover:bg-green-50 transition group"
+                  className="flex items-center gap-3 p-4 border-2 border-green-200 dark:border-green-800 rounded-lg hover:border-green-400 dark:hover:border-green-600 hover:bg-green-50 dark:hover:bg-gray-700 transition group"
                 >
                   <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition">
                     <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -443,8 +443,8 @@ function Profile() {
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <p className="font-semibold text-gray-900">Certificate</p>
-                    <p className="text-sm text-gray-500">Click to download</p>
+                    <p className="font-semibold text-gray-900 dark:text-gray-100">Certificate</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-300">Click to download</p>
                   </div>
                   <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -458,7 +458,7 @@ function Profile() {
         {/* Edit Profile Modal */}
         {isEditing && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 px-4">
-            <div className="bg-white w-full max-w-2xl rounded-xl shadow-xl overflow-auto max-h-[90vh]">
+            <div className="bg-white dark:bg-gray-800 dark:text-gray-100 w-full max-w-2xl rounded-xl shadow-xl overflow-auto max-h-[90vh]">
               <div className="p-6 border-b">
                 <h3 className="text-xl font-semibold">Edit Profile</h3>
                 <p className="text-sm text-gray-500 mt-1">Update your personal & professional details</p>
@@ -474,83 +474,83 @@ function Profile() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Full name</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Full name</label>
                     <input
                       name="name"
                       value={form.name}
                       onChange={handleChange}
-                      className="mt-1 w-full px-3 py-2 border rounded"
+                      className="mt-1 w-full px-3 py-2 border rounded bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
                     />
                     {editErrors.name && <p className="text-sm text-red-500 mt-1">{editErrors.name}</p>}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Mobile</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Mobile</label>
                     <input
                       name="mobile"
                       value={form.mobile}
                       onChange={handleChange}
                       placeholder="10 digit mobile"
-                      className="mt-1 w-full px-3 py-2 border rounded"
+                      className="mt-1 w-full px-3 py-2 border rounded bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
                     />
                     {editErrors.mobile && <p className="text-sm text-red-500 mt-1">{editErrors.mobile}</p>}
                   </div>
 
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700">Address</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Address</label>
                     <textarea
                       name="address"
                       value={form.address}
                       onChange={handleChange}
                       rows={2}
-                      className="mt-1 w-full px-3 py-2 border rounded"
+                      className="mt-1 w-full px-3 py-2 border rounded bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
                     />
                     {editErrors.address && <p className="text-sm text-red-500 mt-1">{editErrors.address}</p>}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Position</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Position</label>
                     <input
                       name="position"
                       value={form.position}
                       onChange={handleChange}
-                      className="mt-1 w-full px-3 py-2 border rounded"
+                      className="mt-1 w-full px-3 py-2 border rounded bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
                     />
                     {editErrors.position && <p className="text-sm text-red-500 mt-1">{editErrors.position}</p>}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Experience</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Experience</label>
                     <input
                       name="experience"
                       value={form.experience}
                       onChange={handleChange}
                       placeholder="e.g., 3 years / Fresher"
-                      className="mt-1 w-full px-3 py-2 border rounded"
+                      className="mt-1 w-full px-3 py-2 border rounded bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
                     />
                     {editErrors.experience && <p className="text-sm text-red-500 mt-1">{editErrors.experience}</p>}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">CV URL</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">CV URL</label>
                     <input
                       name="cvUrl"
                       value={form.cvUrl}
                       onChange={handleChange}
                       placeholder="https://..."
-                      className="mt-1 w-full px-3 py-2 border rounded"
+                      className="mt-1 w-full px-3 py-2 border rounded bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
                     />
                     {editErrors.cvUrl && <p className="text-sm text-red-500 mt-1">{editErrors.cvUrl}</p>}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Certificate URL</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Certificate URL</label>
                     <input
                       name="certificatesUrl"
                       value={form.certificatesUrl}
                       onChange={handleChange}
                       placeholder="https://..."
-                      className="mt-1 w-full px-3 py-2 border rounded"
+                      className="mt-1 w-full px-3 py-2 border rounded bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
                     />
                     {editErrors.certificatesUrl && <p className="text-sm text-red-500 mt-1">{editErrors.certificatesUrl}</p>}
                   </div>
@@ -560,7 +560,7 @@ function Profile() {
                   <button
                     type="button"
                     onClick={closeEdit}
-                    className="px-4 py-2 rounded border hover:bg-gray-50"
+                    className="px-4 py-2 rounded border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-100"
                     disabled={editLoading}
                   >
                     Cancel
@@ -583,4 +583,5 @@ function Profile() {
 }
 
 export default Profile
+                
                 
