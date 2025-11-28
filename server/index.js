@@ -249,6 +249,73 @@ app.post("/create-meeting", async (req, res) => {
   }
 });
 
+app.get("/jobs", async (req, res) => {
+  try {
+    const snapshot = await db.collection("jobs").orderBy("postedAt", "desc").get();
+    const jobs = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    res.json({ jobs });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to load jobs" });
+  }
+});
+
+app.get("/jobs/latest", async (req, res) => {
+  try {
+    const snapshot = await db.collection("jobs")
+      .orderBy("postedAt", "desc")
+      .limit(6)
+      .get();
+
+    const jobs = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    res.json({ jobs });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to load latest jobs" });
+  }
+});
+
+app.get("/search-jobs", async (req, res) => {
+  try {
+    const { role = "", location = "" } = req.query;
+
+    const snapshot = await db.collection("jobs").orderBy("postedAt", "desc").get();
+    let jobs = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    // Convert search to lowercase for flexible matching
+    const r = role.toLowerCase();
+    const l = location.toLowerCase();
+
+    if (r.trim()) {
+      jobs = jobs.filter(job =>
+        job.title?.toLowerCase().includes(r) ||
+        job.company?.toLowerCase().includes(r)
+      );
+    }
+
+    if (l.trim()) {
+      jobs = jobs.filter(job =>
+        job.location?.toLowerCase().includes(l)
+      );
+    }
+
+    res.json({ jobs });
+  } catch (err) {
+    console.error("Search error:", err);
+    res.status(500).json({ error: "Search failed" });
+  }
+});
+
 app.get("/blogs", async (req, res) => {
   try {
     const snapshot = await db.collection("blogs").orderBy("createdAt", "desc").get();
@@ -379,4 +446,3 @@ app.put("/admin/update-role", verifyToken, loadUserRole, requireSuperAdmin, asyn
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
-  
