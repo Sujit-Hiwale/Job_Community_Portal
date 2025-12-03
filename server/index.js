@@ -9,7 +9,26 @@ import nodemailer from "nodemailer";
 dotenv.config();
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: "*",
+  methods: "GET,POST,PUT,DELETE,OPTIONS",
+  allowedHeaders: "Content-Type, Authorization"
+}));
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+
+  next();
+});
+
 app.use(express.json());
 
 const generateZoomToken = async () => {
@@ -106,17 +125,14 @@ app.get("/", (req, res) => {
 
 app.post("/register", async (req, res) => {
   const token = req.headers.authorization?.split("Bearer ")[1];
-  if (!token) return res.status(401).json({ error: "Unauthorized - No token provided" });
+  if (!token)
+    return res.status(401).json({ error: "Unauthorized - No token provided" });
 
   try {
     const decoded = await admin.auth().verifyIdToken(token);
-    console.log("Decoded Firebase user:", decoded);
     const uid = decoded.uid;
 
-    const { name, email, mobile, address, role, position, experience, cvUrl, certificatesUrl } = req.body;
-    console.log("New User Data:", { name, email, role, position, experience });
-
-    await db.collection("users").doc(uid).set({
+    const {
       name,
       email,
       mobile,
@@ -124,33 +140,53 @@ app.post("/register", async (req, res) => {
       role,
       position,
       experience,
-      cvUrl: cvUrl || null,
-      certificatesUrl: certificatesUrl || null,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    }, { merge: true }
-  );
-    res.json({ 
+      cvUrl,
+      certificatesUrl
+    } = req.body;
+
+    // Save user profile
+    await db.collection("users").doc(uid).set(
+      {
+        name,
+        email,
+        mobile,
+        address,
+        role,
+        position,
+        experience,
+        cvUrl: cvUrl || null,
+        certificatesUrl: certificatesUrl || null,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
+
+    // Notify Super Admins about new registration
+    const admins = await db
+      .collection("users")
+      .where("role", "==", "super-admin")
+      .get();
+
+    admins.forEach(async (doc) => {
+      await createNotification(
+        doc.id,
+        "New Registration",
+        `A new user registered: ${name}`,
+        "user-registered",
+        uid
+      );
+    });
+
+    // Send response AFTER all success
+    res.json({
       message: "User registered & saved in Firestore successfully",
       firebaseUid: uid,
     });
   } catch (error) {
     console.error("Error saving user:", error);
-    res.status(401).json({ error: "Server error" });
+    return res.status(500).json({ error: "Server error" });
   }
-  const admins = await db.collection("users")
-    .where("role", "==", "super-admin")
-    .get();
-
-  admins.forEach(async doc => {
-    await createNotification(
-      doc.id,
-      "New registration",
-      `A new user registered: ${name}`,
-      "user-registered",
-      uid
-    );
-  });
 });
 
 app.post("/login", async(req, res) => {
@@ -635,7 +671,6 @@ app.post("/blogs", async (req, res) => {
     if (user.role !== "job-seeker")
       return res.status(403).json({ error: "Only job-seekers can create blogs" });
 
-    // Blog payload
     const { title, content } = req.body;
 
     const newBlog = {
@@ -648,10 +683,35 @@ app.post("/blogs", async (req, res) => {
 
     const docRef = await db.collection("blogs").add(newBlog);
 
+    // Notify author
+    await createNotification(
+      uid,
+      "Blog Published",
+      `Your blog '${title}' was posted successfully!`,
+      "blog-created",
+      docRef.id
+    );
+
+    // 🔥 FIX — fetch admins properly
+    const adminSnapshot = await db.collection("users")
+      .where("role", "in", ["admin", "super-admin"])
+      .get();
+
+    adminSnapshot.docs.forEach(d => {
+      createNotification(
+        d.id,
+        "New Blog Posted",
+        `${user.name} posted a blog titled '${title}'.`,
+        "blog-posted",
+        docRef.id
+      );
+    });
+
     return res.json({
       message: "Blog created successfully",
       id: docRef.id,
     });
+
   } catch (error) {
     console.error("Error creating blog:", error);
     res.status(500).json({ error: "Failed to create blog" });
@@ -719,23 +779,27 @@ app.put("/admin/update-role", verifyToken, loadUserRole, requireSuperAdmin, asyn
       role: newRole,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
+
     // Notify affected user
     await createNotification(
       userId,
-      "Your role has been updated",
-      `Your role has been updated to "${newRole}".`,
+      "Role Updated",
+      `Your role has been updated to '${newRole}'.`,
       "role-updated",
       userId
     );
 
-    // Notify super-admin themself for audit
+    // 🔥 FIX — correct parameter mapping
     await createNotification(
       req.uid,
-      `You updated user ${userId} to role ${newRole}.`,
+      "Role Update Executed",
+      `You updated user ${userId} to role '${newRole}'.`,
       "role-updated-admin",
       userId
     );
+
     return res.json({ message: "Role updated" });
+
   } catch (err) {
     console.error("Role Update Error:", err);
     return res.status(500).json({ error: "Role update failed" });
@@ -744,16 +808,17 @@ app.put("/admin/update-role", verifyToken, loadUserRole, requireSuperAdmin, asyn
 
 app.get("/notifications", verifyToken, async (req, res) => {
   try {
-    const snap = await db.collection("notifications")
+    const snap = await db
+      .collection("notifications")
       .where("userId", "==", req.uid)
-      .orderBy("createdAt", "desc")
       .get();
 
     const notifications = snap.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
-
+    console.log("FETCH NOTIFICATIONS UID =", req.uid);
+    console.log("COLLECTION SIZE =", (await db.collection("notifications").get()).size);
     return res.json({ notifications });
   } catch (err) {
     console.error("Notification fetch error:", err);
@@ -792,6 +857,14 @@ app.put("/notifications/read-all", verifyToken, async (req, res) => {
     console.error("Mark all read error:", err);
     return res.status(500).json({ error: "Failed to mark all read" });
   }
+});
+
+app.get("/notifications/unread-count", verifyToken, async (req,res)=>{
+  const snap = await db.collection("notifications")
+      .where("userId","==",req.uid)
+      .where("status","==","unread")
+      .get();
+  res.json({count: snap.size});
 });
 
 const PORT = process.env.PORT || 5000;

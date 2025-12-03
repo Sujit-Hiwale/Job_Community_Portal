@@ -7,28 +7,45 @@ export default function Notifications() {
   const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
-    if (!currentUser) return; // <-- Prevents null error
+  if (!currentUser) return;
 
-    const fetchNotifications = async () => {
-      try {
-        const token = await currentUser.getIdToken();
+  let isMounted = true;
 
-        const res = await fetch("http://localhost:5000/notifications", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+  const fetchNotifications = async () => {
+    try {
+      const token = await currentUser.getIdToken(true);
 
-        const data = await res.json();
+      const res = await fetch("http://localhost:5000/notifications", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      });
 
-        setNotifications(data.notifications || []);
-      } catch (err) {
-        console.error("Failed to load notifications:", err);
+      const data = await res.json();
+
+      console.log("Fetched data:", data);
+      console.log("Response OK:", res.ok);
+      console.log("Current User UID:", currentUser.uid);
+
+      if (!isMounted) return;
+
+      if (res.ok && Array.isArray(data.notifications)) {
+        setNotifications(data.notifications);
+      } else {
+        console.error("API returned error:", data.error);
+        setNotifications([]);
       }
+    } catch (err) {
+      console.error("Failed to load notifications:", err);
+    }
 
-      setLoading(false);
-    };
+    if (isMounted) setLoading(false);
+  };
 
-    fetchNotifications();
-  }, [currentUser]);
+  fetchNotifications();
+  return () => { isMounted = false };
+}, [currentUser]);
 
   const markAsRead = async (id) => {
     if (!currentUser) return;
@@ -37,7 +54,10 @@ export default function Notifications() {
 
     await fetch(`http://localhost:5000/notifications/${id}/read`, {
       method: "PUT",
-      headers: { Authorization: `Bearer ${token}` }
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
     });
 
     setNotifications(prev =>
