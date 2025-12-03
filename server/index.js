@@ -87,6 +87,19 @@ const requireAdmin = (req, res, next) => {
   next();
 };
 
+async function createNotification(userId, title, message, type, metaRef = null) {
+  return await db.collection("notifications").add({
+    userId,
+    title,
+    message,
+    type,
+    metaRef,
+    status: "unread",  
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+}
+
+
 app.get("/", (req, res) => {
   res.send("Server running successfully!");
 });
@@ -125,6 +138,19 @@ app.post("/register", async (req, res) => {
     console.error("Error saving user:", error);
     res.status(401).json({ error: "Server error" });
   }
+  const admins = await db.collection("users")
+    .where("role", "==", "super-admin")
+    .get();
+
+  admins.forEach(async doc => {
+    await createNotification(
+      doc.id,
+      "New registration",
+      `A new user registered: ${name}`,
+      "user-registered",
+      uid
+    );
+  });
 });
 
 app.post("/login", async(req, res) => {
@@ -316,7 +342,24 @@ app.post("/meeting-request", verifyToken, loadUserRole, async (req, res) => {
         <p>We will respond to you about the date and time soon. Stay tuned!</p>
       `,
     });
+    await createNotification(
+      req.uid,
+      "Meeting Request Submitted",
+      "Your meeting request has been received",
+      "meeting-requested",
+      docRef.id
+    );
 
+    // Notify all admins
+    adminSnapshot.docs.forEach(async d => {
+      await createNotification(
+        d.id,
+        "New Meeting Request",
+        `Meeting request from ${name} (${purpose})`,
+        "meeting-request-received",
+        docRef.id
+      );
+    });
     return res.json({ success: true, id: docRef.id });
   } catch (err) {
     console.error("Meeting request error:", err);
@@ -410,12 +453,25 @@ app.put("/admin/meetings/:id/approve", verifyToken, loadUserRole, requireAdmin, 
     `;
 
     await transporter.sendMail({
-      from: process.env.EMAIL,
-      to: reqData.email,
-      subject: "Your meeting is scheduled",
-      html: htmlForUser,
-    });
+          from: process.env.EMAIL,
+          to: reqData.email,
+          subject: "Your meeting is scheduled",
+          html: htmlForUser,
+        });
+        await createNotification(
+      reqData.createdBy,
+      `Your meeting request was approved. Zoom link sent!`,
+      "meeting-approved",
+      meetingId
+    );
 
+    // Notify approving admin
+    await createNotification(
+      req.uid,
+      `You approved meeting with ${reqData.name}. Link sent.`,
+      "meeting-approved-admin",
+      meetingId
+    );
     return res.json({ success: true, zoomLink: joinLink, meetingId: meetingZoomId });
   } catch (err) {
     console.error("Approve meeting error:", err.response?.data || err);
@@ -456,7 +512,20 @@ app.put("/admin/meetings/:id/decline", verifyToken, loadUserRole, requireAdmin, 
         <p>Reason: ${reason || "No reason provided"}</p>
       `,
     });
+    await createNotification(
+      data.createdBy,
+      `Your meeting was declined: ${reason || "No reason specified"}`,
+      "meeting-declined",
+      meetingId
+    );
 
+    // Notify declining admin
+    await createNotification(
+      req.uid,
+      `You declined meeting request from ${data.name}.`,
+      "meeting-declined-admin",
+      meetingId
+    );
     return res.json({ success: true });
   } catch (err) {
     console.error("Decline error:", err);
@@ -650,7 +719,22 @@ app.put("/admin/update-role", verifyToken, loadUserRole, requireSuperAdmin, asyn
       role: newRole,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
+    // Notify affected user
+    await createNotification(
+      userId,
+      "Your role has been updated",
+      `Your role has been updated to "${newRole}".`,
+      "role-updated",
+      userId
+    );
 
+    // Notify super-admin themself for audit
+    await createNotification(
+      req.uid,
+      `You updated user ${userId} to role ${newRole}.`,
+      "role-updated-admin",
+      userId
+    );
     return res.json({ message: "Role updated" });
   } catch (err) {
     console.error("Role Update Error:", err);
@@ -658,6 +742,57 @@ app.put("/admin/update-role", verifyToken, loadUserRole, requireSuperAdmin, asyn
   }
 });
 
+app.get("/notifications", verifyToken, async (req, res) => {
+  try {
+    const snap = await db.collection("notifications")
+      .where("userId", "==", req.uid)
+      .orderBy("createdAt", "desc")
+      .get();
+
+    const notifications = snap.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    return res.json({ notifications });
+  } catch (err) {
+    console.error("Notification fetch error:", err);
+    return res.status(500).json({ error: "Failed to load notifications" });
+  }
+});
+
+app.put("/notifications/:id/read", verifyToken, async (req, res) => {
+  try {
+    await db.collection("notifications")
+      .doc(req.params.id)
+      .update({ status: "read" });
+
+    return res.json({ success: true });
+  } catch (err) {
+    console.error("Mark read error:", err);
+    return res.status(500).json({ error: "Failed to mark read" });
+  }
+});
+
+app.put("/notifications/read-all", verifyToken, async (req, res) => {
+  try {
+    const snap = await db.collection("notifications")
+      .where("userId", "==", req.uid)
+      .get();
+
+    const batch = db.batch();
+
+    snap.docs.forEach(doc => {
+      batch.update(doc.ref, { status: "read" });
+    });
+
+    await batch.commit();
+    return res.json({ success: true });
+  } catch (err) {
+    console.error("Mark all read error:", err);
+    return res.status(500).json({ error: "Failed to mark all read" });
+  }
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
