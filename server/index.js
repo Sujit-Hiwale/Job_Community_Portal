@@ -205,6 +205,7 @@ app.post("/register", async (req, res) => {
       mobile,
       address,
       role,
+      companyName,
       position,
       experience,
       cvUrl,
@@ -219,6 +220,7 @@ app.post("/register", async (req, res) => {
         mobile,
         address,
         role,
+        companyName: companyName || null,
         position,
         experience,
         cvUrl: cvUrl || null,
@@ -288,7 +290,7 @@ app.put("/update-profile", async (req, res) => {
     const decoded = await admin.auth().verifyIdToken(token);
     const uid = decoded.uid;
 
-    const { name, mobile, address, position, experience } = req.body;
+    const { name, mobile, address, position, experience, companyName } = req.body;
 
     await db.collection("users").doc(uid).set(
       {
