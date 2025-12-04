@@ -163,7 +163,8 @@ function scheduleMeetingReminder(meetingId, reqData, approvedBy, meetingStartJs,
         "Meeting Reminder",
         userMsg,
         "meeting-reminder",
-        meetingId
+        meetingId,
+        zoomLink
       );
 
       // Admin reminder
@@ -172,7 +173,7 @@ function scheduleMeetingReminder(meetingId, reqData, approvedBy, meetingStartJs,
         "Meeting Reminder",
         adminMsg,
         "meeting-reminder-admin",
-        meetingId
+        meetingId, zoomLink
       );
 
       // Optional: mark reminderSent in Firestore

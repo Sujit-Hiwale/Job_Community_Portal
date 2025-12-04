@@ -112,7 +112,6 @@ export default function Notifications() {
                 {n.redirectUrl.startsWith("http")
                   ? "Open link"
                   : "Go to page"}
-                  console.log("Notification entry:", n);
               </p>
             )}
           </div>
