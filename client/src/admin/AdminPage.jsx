@@ -322,32 +322,19 @@ export default function AdminPage() {
                 Users ({userRoleFilter === 'all' ? totalUsers : users.filter(u => u.role === userRoleFilter).length})
               </h2>
               
-              {/* Role Filter Toggle */}
-              <div className="flex gap-2 flex-wrap">
-                <button
-                  onClick={() => setUserRoleFilter('all')}
-                  className={`px-3 py-1 rounded-lg text-xs font-medium transition ${
-                    userRoleFilter === 'all'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-                  }`}
-                >
-                  All
-                </button>
-                {ROLES.map(role => (
-                  <button
-                    key={role}
-                    onClick={() => setUserRoleFilter(role)}
-                    className={`px-3 py-1 rounded-lg text-xs font-medium transition ${
-                      userRoleFilter === role
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-                    }`}
-                  >
-                    {role}
-                  </button>
-                ))}
-              </div>
+              {/* Role Filter Dropdown */}
+              <select
+                value={userRoleFilter}
+                onChange={(e) => setUserRoleFilter(e.target.value)}
+                className="px-4 py-2 rounded-lg text-sm font-medium border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+              >
+                <option value="all">All Roles</option>
+                <option value="super-admin">Super-admin</option>
+                <option value="admin">Admin</option>
+                <option value="job-seeker">Job-seeker</option>
+                <option value="recruiter">Recruiter</option>
+                <option value="company">Company</option>
+              </select>
             </div>
             
             <div className="space-y-3 max-h-96 overflow-auto">
