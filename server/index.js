@@ -216,18 +216,22 @@ app.post("/register", async (req, res) => {
       certificatesUrl
     } = req.body;
 
-    if (!experience || typeof experience !== "object" || experience.value == null || experience.unit == null) {
+    // Validate experience
+    if (
+      !experience ||
+      typeof experience !== "object" ||
+      experience.value == null ||
+      experience.unit == null
+    ) {
       return res.status(400).json({ error: "Invalid experience format" });
     }
 
     companyName = companyName ? companyName.trim() : null;
 
-    let assignedRole = role;
-
     let companyId = null;
 
     if (companyName) {
-      // 1) Check if company exists
+      // Check if company exists
       const companySnap = await db
         .collection("companies")
         .where("name", "==", companyName)
@@ -235,16 +239,10 @@ app.post("/register", async (req, res) => {
         .get();
 
       if (!companySnap.empty) {
-        // company exists → assign employee role
-        const existingCompany = companySnap.docs[0];
-        companyId = existingCompany.id;
-
-        if (role === "company") {
-          // ❌ prevent someone claiming founder of existing company
-          assignedRole = "employee";
-        }
+        // Use existing company
+        companyId = companySnap.docs[0].id;
       } else {
-        // company does NOT exist → create new company doc
+        // Create new company
         const newCompanyRef = await db.collection("companies").add({
           name: companyName,
           logoUrl: null,
@@ -254,9 +252,6 @@ app.post("/register", async (req, res) => {
         });
 
         companyId = newCompanyRef.id;
-
-        // user automatically becomes founder
-        assignedRole = "company-founder";
       }
     }
 
@@ -265,7 +260,7 @@ app.post("/register", async (req, res) => {
       email,
       mobile,
       address,
-      role: assignedRole,
+      role,
       companyName,
       companyId: companyId || null,
       position,
@@ -278,24 +273,25 @@ app.post("/register", async (req, res) => {
 
     await db.collection("users").doc(uid).set(userData, { merge: true });
 
-    // 🔗 If joining a company, also add to employees list
+    // If company exists, register employee under company
     if (companyId) {
-      await db.collection("companies").doc(companyId)
+      await db
+        .collection("companies")
+        .doc(companyId)
         .collection("employees")
         .doc(uid)
         .set({
           name,
           email,
           position,
-          role: assignedRole,
+          role,
           joinedAt: admin.firestore.FieldValue.serverTimestamp(),
         });
     }
 
-    // Send response AFTER all success
     return res.json({
       message: "Registered successfully",
-      roleAssigned: assignedRole,
+      roleAssigned: role,
       companyId,
       firebaseUid: uid,
     });
@@ -304,6 +300,7 @@ app.post("/register", async (req, res) => {
     return res.status(500).json({ error: "Server error" });
   }
 });
+
 
 app.post("/login", async(req, res) => {
   const token = req.headers.authorization?.split("Bearer ")[1]
@@ -338,26 +335,33 @@ app.get("/user/profile", verifyToken, loadUserRole, async (req, res) => {
     if (!userSnap.exists)
       return res.status(404).json({ error: "User profile not found" });
 
-    const profile = userSnap.data();
+    const profile = { id: userSnap.id, ...userSnap.data() };
 
     let company = null;
 
     if (profile.companyId) {
-      const companySnap = await db.collection("companies").doc(profile.companyId).get();
+      const companySnap = await db.collection("companies")
+        .doc(profile.companyId)
+        .get();
+
       if (companySnap.exists) {
-        company = { id: companySnap.id, ...companySnap.data() };
+        company = {
+          id: companySnap.id,
+          ...companySnap.data(),
+        };
       }
     }
 
-    res.json({
+    return res.json({
       message: "Profile loaded successfully",
       profile,
       company,
       uid: req.uid,
     });
+
   } catch (err) {
     console.error("Profile load error:", err);
-    res.status(500).json({ error: "Failed to load user profile" });
+    return res.status(500).json({ error: "Failed to load user profile" });
   }
 });
 
@@ -1178,32 +1182,47 @@ app.put("/company/update-user-role",
   }
 );
 
-app.put("/company/profile/update", verifyToken, loadUserRole, requireCompanyOwner, async (req, res) => {
-  try {
-    const { logoUrl, website, description } = req.body;
+app.put("/company/update", async (req, res) => {
+  const token = req.headers.authorization?.split("Bearer ")[1];
 
-    const companySnap = await db.collection("companies")
-      .where("ownerId", "==", req.uid)
+  if (!token) {
+    return res.status(401).json({ error: "Unauthorized - No token provided" });
+  }
+
+  try {
+    const decoded = await admin.auth().verifyIdToken(token);
+    const uid = decoded.uid;
+
+    const { name, address, description, logoUrl } = req.body;
+
+    if (!name) return res.status(400).json({ error: "Company name required" });
+
+    // Fetch company linked to this user
+    const companySnapshot = await db
+      .collection("companies")
+      .where("ownerId", "==", uid)
       .limit(1)
       .get();
 
-    if (companySnap.empty) {
-      return res.status(404).json({ error: "Company profile not found" });
+    if (companySnapshot.empty) {
+      return res.status(404).json({ error: "Company not found or user not owner" });
     }
 
-    const companyId = companySnap.docs[0].id;
+    const companyRef = companySnapshot.docs[0].ref;
 
-    await db.collection("companies").doc(companyId).update({
-      logoUrl: logoUrl ?? undefined,
-      website: website ?? undefined,
-      description: description ?? undefined,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    await companyRef.update({
+      name,
+      address: address || null,
+      description: description || null,
+      logoUrl: logoUrl || null,
+      updatedAt: new Date(),
     });
 
-    return res.json({ success: true });
-  } catch (err) {
-    console.error("Company profile update error:", err);
-    return res.status(500).json({ error: "Failed to update company profile" });
+    res.status(200).json({ message: "Company updated successfully" });
+
+  } catch (error) {
+    console.error("Company update failed:", error);
+    res.status(500).json({ error: "Server error updating company" });
   }
 });
 

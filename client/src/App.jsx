@@ -8,6 +8,7 @@ import Services from './pages/Services'
 import Jobs from './components/Jobs/Jobs'
 import BookMeeting from './pages/BookMeeting'
 import Profile from './pages/Profile'
+import CompanyEdit from './pages/CompanyEdit'
 import Register from './pages/auth/Register'
 import Login from './pages/auth/Login'
 import BlogList from "./components/Blog/BlogList";
@@ -34,6 +35,7 @@ function App() {
             <Route path="/services" element={<Services />} />
             <Route path="/book-meeting" element={<BookMeeting />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/company/edit" element={<CompanyEdit />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/auth/register" element={<Register />} />
             <Route path="/auth/login" element={<Login />} />

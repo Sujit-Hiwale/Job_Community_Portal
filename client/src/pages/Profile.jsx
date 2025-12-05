@@ -8,6 +8,7 @@ import { db } from '../firebase/firebaseConfig'
 
 function Profile() {
   const { currentUser, userRole, signOut } = useAuth()
+  const [companyData, setCompanyData] = useState(null)
   const navigate = useNavigate()
   const [userData, setUserData] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -26,45 +27,75 @@ function Profile() {
     address: '',
     position: '',
     experience: '',
+    experienceUnit: 'years',
     cvUrl: '',
     certificatesUrl: '',
+    companyName: '',
+    companyAddress: '',
+    companyDescription: '',
+    companyLogoUrl: '',
   })
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (!currentUser) {
-        setLoading(false)
-        return
-      }
-
-      try {
-        const userDoc = await getDoc(doc(db, 'users', currentUser.uid))
-        if (userDoc.exists()) {
-          const data = userDoc.data()
-          setUserData(data)
-          // fill edit form with existing values
-          setForm({
-            name: data.name || '',
-            mobile: data.mobile || '',
-            address: data.address || '',
-            position: data.position || '',
-            experience: data.experience || '',
-            cvUrl: data.cvUrl || '',
-            certificatesUrl: data.certificatesUrl || '',
-          })
-        } else {
-          setError('User profile not found')
-        }
-      } catch (err) {
-        console.error('Error fetching user data:', err)
-        setError('Failed to load profile data')
-      } finally {
-        setLoading(false)
-      }
+useEffect(() => {
+  const fetchUserData = async () => {
+    if (!currentUser) {
+      setLoading(false)
+      return
     }
 
-    fetchUserData()
-  }, [currentUser])
+    try {
+      const userDoc = await getDoc(doc(db, 'users', currentUser.uid))
+      if (userDoc.exists()) {
+        const data = userDoc.data()
+        setUserData(data)
+
+        // fill edit form with existing values
+        setForm({
+          name: data.name || '',
+          mobile: data.mobile || '',
+          address: data.address || '',
+          position: data.position || '',
+          experience: typeof data.experience === "object"
+            ? data.experience.value
+            : data.experience || '',
+          experienceUnit: typeof data.experience === "object"
+            ? data.experience.unit
+            : "years",
+          cvUrl: data.cvUrl || '',
+          certificatesUrl: data.certificatesUrl || '',
+          companyName: data.companyName || '',
+        })
+
+        // ⭐ Fetch company data here — where data exists
+        if (data.companyId) {
+          try {
+            const token = await currentUser.getIdToken()
+            const res = await axios.get("http://localhost:5000/user/profile", {
+              headers: { Authorization: `Bearer ${token}` }
+            })
+
+            if (res.data?.company) {
+              setCompanyData(res.data.company)
+            }
+          } catch (err) {
+            console.error("Company fetch error:", err)
+          }
+        }
+
+      } else {
+        setError('User profile not found')
+      }
+    } catch (err) {
+      console.error('Error fetching user data:', err)
+      setError('Failed to load profile data')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  fetchUserData()
+}, [currentUser])
+
 
   const handleLogout = async () => {
     try {
@@ -84,9 +115,18 @@ function Profile() {
       mobile: userData?.mobile || '',
       address: userData?.address || '',
       position: userData?.position || '',
-      experience: userData?.experience || '',
+      experience: typeof userData?.experience === "object"
+          ? userData.experience.value
+          : userData?.experience || '',
+      experienceUnit: typeof userData?.experience === "object"
+          ? userData.experience.unit
+          : "years",
       cvUrl: userData?.cvUrl || '',
       certificatesUrl: userData?.certificatesUrl || '',
+      companyName: userData?.companyName || '',
+      companyAddress: userData?.companyAddress || '',
+      companyDescription: userData?.companyDescription || '',
+      companyLogoUrl: userData?.companyLogo || '',
     })
     setIsEditing(true)
   }
@@ -143,9 +183,13 @@ function Profile() {
         mobile: form.mobile.trim(),
         address: form.address.trim(),
         position: form.position.trim(),
-        experience: form.experience.trim(),
+        experience: {
+          value: parseInt(form.experience) || 0,
+          unit: form.experienceUnit || "years"
+        },
         cvUrl: form.cvUrl?.trim() || null,
         certificatesUrl: form.certificatesUrl?.trim() || null,
+        companyName: form.companyName.trim(),
       }
 
       // PUT to your backend update route (you should implement /update-profile in server)
@@ -161,6 +205,26 @@ function Profile() {
         setUserData(response.data.profile)
       } else {
         setUserData(prev => ({ ...prev, ...payload }))
+      }
+      // Fetch extended profile with company info
+      try {
+        const token = await currentUser.getIdToken();
+        const res = await axios.get("http://localhost:5000/user/profile", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (res.data?.company) {
+          setUserData(prev => ({
+            ...prev,
+            companyName: res.data.company.name,
+            companyLogo: res.data.company.logoUrl,
+            companyOwnerId: res.data.company.ownerId,
+            companyAddress: res.data.company.address,
+            companyDescription: res.data.company.description
+          }));
+        }
+      } catch (e) {
+        console.error("Company fetch error:", e);
       }
 
       setEditSuccess('Profile updated successfully.')
@@ -256,6 +320,32 @@ function Profile() {
                   <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
                     {userData?.name || currentUser.displayName || 'User'}
                   </h1>
+                  {userData?.companyLogo && (
+  <img
+    src={userData.companyLogo}
+    alt="Company Logo"
+    className="w-10 h-10 rounded-full border shadow-sm mb-1"
+  />
+)}
+
+{userData?.companyName && (
+  <div className="flex items-center gap-2">
+    <p className="text-sm text-gray-600 dark:text-gray-300">
+      📌 {userData.companyName}
+    </p>
+
+    {/* Show edit button only if logged user owns the company */}
+    {companyData && currentUser.uid === companyData.ownerId && (
+      <button
+        onClick={() => navigate("/company/edit")}  // ⬅ Redirect to company edit form page
+        className="text-xs px-2 py-1 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full shadow-md"
+      >
+        Edit Company
+      </button>
+    )}
+  </div>
+)}
+
                   <div className="flex items-center gap-2 mt-2 flex-wrap">
                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                       userRole === 'company' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
@@ -375,7 +465,12 @@ function Profile() {
                   </svg>
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-300 font-medium">Experience</p>
-                    <p className="text-gray-900 dark:text-gray-100">{userData.experience || '—'}</p>
+                    <p className="text-gray-900 dark:text-gray-100">
+  {typeof userData.experience === "object"
+    ? `${userData.experience.value} ${userData.experience.unit}`
+    : userData.experience}
+</p>
+
                   </div>
                 </div>
               )}
@@ -522,13 +617,29 @@ function Profile() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Experience</label>
-                    <input
-                      name="experience"
-                      value={form.experience}
-                      onChange={handleChange}
-                      placeholder="e.g., 3 years / Fresher"
-                      className="mt-1 w-full px-3 py-2 border rounded bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
-                    />
+                    
+                    <div className="flex gap-2">
+                      <input
+                        name="experience"
+                        value={form.experience}
+                        onChange={handleChange}
+                        placeholder="e.g., 3"
+                        className="mt-1 w-full px-3 py-2 border rounded bg-white dark:bg-gray-700
+                                  border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
+                      />
+                      
+                      <select
+                        name="experienceUnit"
+                        value={form.experienceUnit}
+                        onChange={handleChange}
+                        className="mt-1 px-3 py-2 border rounded bg-white dark:bg-gray-700
+                                  border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
+                      >
+                        <option value="years">Years</option>
+                        <option value="months">Months</option>
+                      </select>
+                    </div>
+
                     {editErrors.experience && <p className="text-sm text-red-500 mt-1">{editErrors.experience}</p>}
                   </div>
 
@@ -584,5 +695,3 @@ function Profile() {
 }
 
 export default Profile
-                
-                
