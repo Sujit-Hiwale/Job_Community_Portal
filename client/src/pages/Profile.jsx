@@ -1,4 +1,3 @@
-// Profile.jsx
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import axios from 'axios'
@@ -320,32 +319,6 @@ useEffect(() => {
                   <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
                     {userData?.name || currentUser.displayName || 'User'}
                   </h1>
-                  {userData?.companyLogo && (
-  <img
-    src={userData.companyLogo}
-    alt="Company Logo"
-    className="w-10 h-10 rounded-full border shadow-sm mb-1"
-  />
-)}
-
-{userData?.companyName && (
-  <div className="flex items-center gap-2">
-    <p className="text-sm text-gray-600 dark:text-gray-300">
-      📌 {userData.companyName}
-    </p>
-
-    {/* Show edit button only if logged user owns the company */}
-    {companyData && currentUser.uid === companyData.ownerId && (
-      <button
-        onClick={() => navigate("/company/edit")}  // ⬅ Redirect to company edit form page
-        className="text-xs px-2 py-1 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full shadow-md"
-      >
-        Edit Company
-      </button>
-    )}
-  </div>
-)}
-
                   <div className="flex items-center gap-2 mt-2 flex-wrap">
                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                       userRole === 'company' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
@@ -386,6 +359,57 @@ useEffect(() => {
         {error && (
           <div className="bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg mb-6">
             {error}
+          </div>
+        )}
+
+        {/* Company Information Card - Horizontal */}
+        {userData?.companyName && (
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                {companyData?.logoUrl && (
+                  <img
+                    src={companyData.logoUrl}
+                    alt="Company Logo"
+                    className="w-16 h-16 rounded-lg border-2 border-gray-200 dark:border-gray-700 shadow-md object-cover"
+                  />
+                )}
+                <div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">Company</p>
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                    {userData.companyName}
+                  </h3>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                {companyData?.owners?.includes(currentUser.uid) && (
+                  <>
+                    <button
+                      onClick={() => navigate("/company/edit")}
+                      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg transition font-medium shadow-md hover:shadow-lg"
+                      title="Edit Company Details"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                      Edit Company
+                    </button>
+                                    
+                    <button
+                      onClick={() => navigate("/company/dashboard")}
+                      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg transition font-medium shadow-md hover:shadow-lg"
+                      title="Company Dashboard"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                      Dashboard
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
         )}
 

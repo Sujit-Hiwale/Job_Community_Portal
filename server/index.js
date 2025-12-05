@@ -1221,28 +1221,29 @@ app.put("/company/update", async (req, res) => {
 
     const { name, address, description, logoUrl } = req.body;
 
+    // 🔥 Find company where logged user is in owners array
     const companySnapshot = await db
       .collection("companies")
-      .where("ownerId", "==", uid)
+      .where("owners", "array-contains", uid)
       .limit(1)
       .get();
 
     if (companySnapshot.empty) {
-      return res.status(404).json({ error: "No company found for this user" });
+      return res.status(404).json({ error: "No company found for this user OR user not owner" });
     }
 
     const companyRef = companySnapshot.docs[0].ref;
 
-    // Update actual company document
+    // 🔐 Update company doc
     await companyRef.update({
-      name,
-      address: address || null,
-      description: description || null,
-      logoUrl: logoUrl || null,
+      name: name?.trim(),
+      address: address?.trim() || null,
+      description: description?.trim() || null,
+      logoUrl: logoUrl?.trim() || null,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-    // ⭐ Sync new name to all users under this company
+    // ⭐ Update all employees who have this companyId
     const employeesSnap = await db
       .collection("users")
       .where("companyId", "==", companyRef.id)
@@ -1252,14 +1253,17 @@ app.put("/company/update", async (req, res) => {
 
     employeesSnap.docs.forEach(doc => {
       batch.update(doc.ref, {
-        companyName: name,
+        companyName: name?.trim(),
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
     });
 
     await batch.commit();
 
-    res.status(200).json({ message: "Company updated and synced successfully" });
+    res.status(200).json({
+      message: "Company updated successfully",
+      companyId: companyRef.id
+    });
 
   } catch (error) {
     console.error("Company update failed:", error);
