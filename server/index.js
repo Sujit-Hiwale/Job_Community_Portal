@@ -1112,18 +1112,24 @@ app.get("/notifications", verifyToken, async (req, res) => {
       .where("userId", "==", req.uid)
       .get();
 
-    const notifications = snap.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-    console.log("FETCH NOTIFICATIONS UID =", req.uid);
-    console.log("COLLECTION SIZE =", (await db.collection("notifications").get()).size);
+    const notifications = snap.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        createdAt: data.createdAt
+          ? data.createdAt.toMillis() // convert timestamp -> ms
+          : null
+      };
+    });
+
     return res.json({ notifications });
   } catch (err) {
     console.error("Notification fetch error:", err);
     return res.status(500).json({ error: "Failed to load notifications" });
   }
 });
+
 
 app.put("/notifications/:id/read", verifyToken, async (req, res) => {
   try {
