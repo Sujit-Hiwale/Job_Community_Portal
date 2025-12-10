@@ -117,14 +117,14 @@ export default function CreateJob() {
           className="border p-2 w-full bg-gray-100"
           placeholder="Company Name"
           value={company}
-          disabled
+          required
         />
 
         <input
           className="border p-2 w-full bg-gray-100"
           placeholder="Location (City, Country)"
           value={location}
-          disabled
+          required
         />
 
         <div className="flex gap-4">
