@@ -6,6 +6,9 @@ import fs from "fs";
 import axios from "axios";
 import nodemailer from "nodemailer";
 import cron from "node-cron";
+import { getFirestore } from "firebase-admin/firestore";
+
+const firestore = getFirestore();
 
 dotenv.config();
 
@@ -670,7 +673,6 @@ app.put("/admin/companies/:id/approve", verifyToken, loadUserRole, requireAdmin,
 app.put("/admin/companies/:id/reject", verifyToken, loadUserRole, requireAdmin, async (req, res) => {
   try {
     const companyId = req.params.id;
-
     const companyRef = db.collection("companies").doc(companyId);
     const snap = await companyRef.get();
 
@@ -680,14 +682,13 @@ app.put("/admin/companies/:id/reject", verifyToken, loadUserRole, requireAdmin, 
     const companyData = snap.data();
     const companyName = companyData.name;
 
-    // 1. Fetch all users who belong to this company
+    // 1️⃣ Detach all users from company
     const usersSnap = await db.collection("users")
       .where("companyId", "==", companyId)
       .get();
 
     const batch = db.batch();
 
-    // 2. Detach users and notify each
     for (const doc of usersSnap.docs) {
       const userId = doc.id;
 
@@ -698,34 +699,33 @@ app.put("/admin/companies/:id/reject", verifyToken, loadUserRole, requireAdmin, 
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
 
-      // Send notification to user
       await createNotification(
         userId,
         "Company Rejected",
-        `Your company '${companyName}' was rejected by admin. You are now marked as not associated with any company.`,
+        `Your company '${companyName}' was rejected by admin.`,
         "company-rejected",
         companyId,
         "/profile"
       );
     }
 
-    // 3. Delete company document
-    batch.delete(companyRef);
-
     await batch.commit();
 
-    // 4. Notify admin who performed the action
+    // 2️⃣ Now safely delete company with ALL subcollections
+    await firestore.recursiveDelete(companyRef);
+
+    // 3️⃣ Notify admin
     await createNotification(
       req.uid,
       "Company Rejected Successfully",
-      `You rejected the company '${companyName}'. All associated users were detached.`,
+      `You rejected '${companyName}'.`,
       "company-rejected-admin",
       companyId,
       "/admin/companies"
     );
 
     return res.json({
-      message: "Company rejected, deleted, and all users were notified & detached successfully."
+      message: "Company rejected and fully deleted"
     });
 
   } catch (error) {
