@@ -610,19 +610,61 @@ app.get("/admin/companies/pending", verifyToken, loadUserRole, requireAdmin, asy
   });
 });
 
-app.put("/admin/companies/:id/approve", verifyToken, loadUserRole, requireAdmin, async(req, res) => {
+app.put("/admin/companies/:id/approve", verifyToken, loadUserRole, requireAdmin, async (req, res) => {
   const companyId = req.params.id;
 
-  const ref = db.collection("companies").doc(companyId);
-  const snap = await ref.get();
-  if (!snap.exists) return res.status(404).json({ error: "Company not found" });
+  try {
+    const companyRef = db.collection("companies").doc(companyId);
+    const snap = await companyRef.get();
 
-  await ref.update({
-    status: "accepted",
-    updatedAt: admin.firestore.FieldValue.serverTimestamp()
-  });
+    if (!snap.exists) {
+      return res.status(404).json({ error: "Company not found" });
+    }
 
-  return res.json({ message: "Company approved" });
+    const companyData = snap.data();
+    const companyName = companyData.name;
+
+    // 1️⃣ Mark as accepted
+    await companyRef.update({
+      status: "accepted",
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    // 2️⃣ Notify ALL USERS who belong to this company
+    const employeesSnap = await db
+      .collection("users")
+      .where("companyId", "==", companyId)
+      .get();
+
+    for (const doc of employeesSnap.docs) {
+      const userId = doc.id;
+
+      await createNotification(
+        userId,
+        "Company Approved",
+        `Your company '${companyName}' has been approved by the admin.`,
+        "company-approved",
+        companyId,
+        "/profile"
+      );
+    }
+
+    // 3️⃣ Notify Admin who approved
+    await createNotification(
+      req.uid,
+      "Company Approved Successfully",
+      `You approved '${companyName}'. All associated users have been notified.`,
+      "company-approved-admin",
+      companyId,
+      "/admin/companies"
+    );
+
+    return res.json({ message: "Company approved & notifications sent" });
+
+  } catch (err) {
+    console.error("Company approval error:", err);
+    return res.status(500).json({ error: "Failed to approve company" });
+  }
 });
 
 app.put("/admin/companies/:id/reject", verifyToken, loadUserRole, requireAdmin, async (req, res) => {

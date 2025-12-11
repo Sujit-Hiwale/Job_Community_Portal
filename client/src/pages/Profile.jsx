@@ -370,8 +370,8 @@ useEffect(() => {
           </div>
         )}
 
-        {/* Company Information Card - Horizontal */}
-        {userData?.companyName && (
+        {/* ⭐ If company exists show company card, else show Visit Companies */}
+        {companyData ? (
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
@@ -382,32 +382,42 @@ useEffect(() => {
                     className="w-16 h-16 rounded-lg border-2 border-gray-200 dark:border-gray-700 shadow-md object-cover"
                   />
                 )}
+
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">Company</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">
+                    Company
+                  </p>
+
                   <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                     {userData.companyName}
+
+                    {/* ⭐ Show ONLY pending status */}
+                    {companyData?.status === "pending" && (
+                      <span className="px-3 py-1 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
+                        Pending Approval
+                      </span>
+                    )}
                   </h3>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-3">
+                {/* ⭐ Allow editing/dashboard buttons ONLY for owners */}
                 {companyData?.owners?.includes(currentUser.uid) && (
                   <>
                     <button
                       onClick={() => navigate("/company/edit")}
                       className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg transition font-medium shadow-md hover:shadow-lg"
-                      title="Edit Company Details"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
                       Edit Company
                     </button>
-                                    
+
                     <button
                       onClick={() => navigate("/company/dashboard")}
                       className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg transition font-medium shadow-md hover:shadow-lg"
-                      title="Company Dashboard"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -418,6 +428,19 @@ useEffect(() => {
                 )}
               </div>
             </div>
+          </div>
+        ) : (
+          /* ⭐ When NO companyData returned */
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6 text-center">
+            <p className="text-gray-700 dark:text-gray-300 mb-3">
+              You are not associated with any company.
+            </p>
+            <button
+              onClick={() => navigate("/companies")}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            >
+              Visit Companies
+            </button>
           </div>
         )}
 
