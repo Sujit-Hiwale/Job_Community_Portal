@@ -306,7 +306,7 @@ export default function Companies() {
                     <div className="flex items-center gap-2">
                       <Users className="w-4 h-4 text-purple-600" />
                       <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                        {company.followers || 0} Followers
+                        {company.employeeCount || "50-200"}
                       </span>
                     </div>
                   </div>

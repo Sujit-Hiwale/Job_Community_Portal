@@ -232,32 +232,10 @@ export default function CompanyProfile() {
                   </div>
                 </div>
               </div>
-
-              {/* Follow Button */}
-              <button
-                onClick={handleFollowToggle}
-                className={`mt-4 md:mt-0 px-6 py-3 rounded-xl font-semibold flex items-center gap-2 transition transform hover:scale-105 ${
-                  isFollowing
-                    ? "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
-                    : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700"
-                }`}
-              >
-                {isFollowing ? (
-                  <>
-                    <UserMinus className="w-5 h-5" />
-                    Unfollow
-                  </>
-                ) : (
-                  <>
-                    <UserPlus className="w-5 h-5" />
-                    Follow
-                  </>
-                )}
-              </button>
             </div>
 
             {/* Company Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
               <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-xl p-4 text-center">
                 <Users className="w-8 h-8 text-blue-600 mx-auto mb-2" />
                 <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
@@ -265,16 +243,6 @@ export default function CompanyProfile() {
                 </div>
                 <div className="text-sm text-gray-600 dark:text-gray-400">
                   Employees
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-xl p-4 text-center">
-                <Heart className="w-8 h-8 text-purple-600 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                  {followersCount}
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  Followers
                 </div>
               </div>
 

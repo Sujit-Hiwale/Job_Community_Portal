@@ -12,6 +12,7 @@ export default function Home() {
   const [displayedJobs, setDisplayedJobs] = useState([]);
   const [loading, setLoading] = useState(true);
 
+
   const categories = [
     { name: "Software Developer", icon: "💻", count: 0 },
     { name: "Marketing", icon: "📱", count: 0 },
