@@ -36,67 +36,58 @@ function Profile() {
     gender: '',
   })
 
-useEffect(() => {
-  const fetchUserData = async () => {
-    if (!currentUser) {
-      setLoading(false)
-      return
-    }
-
-    try {
-      const userDoc = await getDoc(doc(db, 'users', currentUser.uid))
-      if (userDoc.exists()) {
-        const data = userDoc.data()
-        setUserData(data)
-
-        // fill edit form with existing values
-        setForm({
-          name: data.name || '',
-          mobile: data.mobile || '',
-          address: data.address || '',
-          position: data.position || '',
-          experience: typeof data.experience === "object"
-            ? Number(data.experience.value)
-            : Number(data.experience) || '',
-          experienceUnit: typeof data.experience === "object"
-            ? data.experience.unit
-            : "years",
-          cvUrl: data.cvUrl || '',
-          certificatesUrl: data.certificatesUrl || '',
-          companyName: data.companyName || '',
-          gender: data.gender || '',
-        })
-
-        // ⭐ Fetch company data here — where data exists
-        if (data.companyId) {
-          try {
-            const token = await currentUser.getIdToken()
-            const res = await axios.get("http://localhost:5000/user/profile", {
-              headers: { Authorization: `Bearer ${token}` }
-            })
-
-            if (res.data?.company) {
-              setCompanyData(res.data.company)
-            }
-          } catch (err) {
-            console.error("Company fetch error:", err)
-          }
-        }
-
-      } else {
-        setError('User profile not found')
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!currentUser) {
+        setLoading(false);
+        return;
       }
-    } catch (err) {
-      console.error('Error fetching user data:', err)
-      setError('Failed to load profile data')
-    } finally {
-      setLoading(false)
-    }
-  }
 
-  fetchUserData()
-}, [currentUser])
+      try {
+        const token = await currentUser.getIdToken();
 
+        const res = await axios.get(
+          "http://localhost:5000/user/profile",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        // backend should return { profile, company }
+        setUserData(res.data.profile);
+        setCompanyData(res.data.company || null);
+
+        // prefill edit form
+        const data = res.data.profile;
+        setForm({
+          name: data.name || "",
+          mobile: data.mobile || "",
+          address: data.address || "",
+          position: data.position || "",
+          experience:
+            typeof data.experience === "object"
+              ? Number(data.experience.value)
+              : Number(data.experience) || "",
+          experienceUnit:
+            typeof data.experience === "object"
+              ? data.experience.unit
+              : "years",
+          cvUrl: data.cvUrl || "",
+          certificatesUrl: data.certificatesUrl || "",
+          companyName: data.companyName || "",
+          gender: data.gender || "",
+        });
+
+      } catch (err) {
+        console.error("Profile fetch error:", err);
+        setError("Failed to load profile data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [currentUser]);
 
   const handleLogout = async () => {
     try {
