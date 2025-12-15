@@ -1,7 +1,5 @@
-// src/pages/CreateBlog.jsx
 import { useState } from "react";
-import { db } from "../../firebase/firebaseConfig";
-import { collection, addDoc } from "firebase/firestore";
+import axios from "axios";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
@@ -13,22 +11,22 @@ export default function CreateBlog() {
   const [image, setImage] = useState("");
   const [content, setContent] = useState("");
 
-  if (userRole == "job-seeker")
+  if (userRole === "job-seeker")
     return <p className="p-6 text-red-600">You do not have permissions.</p>;
 
   async function submitBlog(e) {
     e.preventDefault();
 
-    await addDoc(collection(db, "blogs"), {
-      title,
-      content,
-      image,
-      authorId: currentUser.uid,
-      authorName: currentUser.displayName,
-      createdAt: new Date(),
-      likes: [],
-      dislikes: [],
-    });
+    await axios.post(
+      `${import.meta.env.VITE_API_URL}/blogs`,
+      { title, content, image },
+      {
+        headers: {
+          Authorization: `Bearer ${await currentUser.getIdToken()}`
+        }
+      }
+    );
+
     navigate("/blog");
   }
 
@@ -62,7 +60,7 @@ export default function CreateBlog() {
         />
 
         <button
-          className="bg-blue-600 text-white px-6 py-2 rounded shadow"
+          className="bg-blue-600 text-white px-6 py-2 rounded"
           type="submit"
         >
           Publish

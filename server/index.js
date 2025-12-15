@@ -965,6 +965,67 @@ app.get("/jobs", async (req, res) => {
   }
 });
 
+const verifyTokenOptional = async (req, res, next) => {
+  const token = req.headers.authorization?.split("Bearer ")[1];
+  if (!token) return next();
+  try {
+    const decoded = await admin.auth().verifyIdToken(token);
+    req.uid = decoded.uid;
+  } catch {}
+  next();
+};
+
+app.get("/jobs/:id", verifyTokenOptional, async (req, res) => {
+  try {
+    const snap = await db.collection("jobs").doc(req.params.id).get();
+    if (!snap.exists) return res.status(404).json({ error: "Job not found" });
+
+    const job = snap.data();
+
+    res.json({
+      job: {
+        id: snap.id,
+        ...job,
+        canEdit: req.uid
+          ? job.createdBy === req.uid
+          : false
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to load job" });
+  }
+});
+
+app.put("/jobs/:id/apply", verifyToken, async (req, res) => {
+  const jobRef = db.collection("jobs").doc(req.params.id);
+
+  await jobRef.update({
+    appliedBy: admin.firestore.FieldValue.arrayUnion(req.uid)
+  });
+
+  res.json({ success: true });
+});
+
+app.put("/jobs/:id/save", verifyToken, async (req, res) => {
+  const jobRef = db.collection("jobs").doc(req.params.id);
+
+  await jobRef.update({
+    savedBy: admin.firestore.FieldValue.arrayUnion(req.uid)
+  });
+
+  res.json({ success: true });
+});
+
+app.get("/me/company", verifyToken, loadUserRole, async (req, res) => {
+  if (!req.user.companyId)
+    return res.status(404).json({ error: "No company linked" });
+
+  const snap = await db.collection("companies").doc(req.user.companyId).get();
+  if (!snap.exists) return res.status(404).json({ error: "Company not found" });
+
+  res.json(snap.data());
+});
+
 app.post("/jobs/create", verifyToken, loadUserRole, async (req, res) => {
   try {
     const uid = req.uid;
@@ -1166,6 +1227,107 @@ app.post("/blogs", async (req, res) => {
     console.error("Error creating blog:", error);
     res.status(500).json({ error: "Failed to create blog" });
   }
+});
+
+app.get("/blogs/:id", async (req, res) => {
+  try {
+    const snap = await db.collection("blogs").doc(req.params.id).get();
+    if (!snap.exists) return res.status(404).json({ error: "Blog not found" });
+
+    const data = snap.data();
+
+    res.json({
+      blog: {
+        id: snap.id,
+        ...data,
+        createdAt: data.createdAt?.toMillis() || null
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to load blog" });
+  }
+});
+
+app.put("/blogs/:id/like", verifyToken, async (req, res) => {
+  const ref = db.collection("blogs").doc(req.params.id);
+
+  await ref.update({
+    likes: admin.firestore.FieldValue.arrayUnion(req.uid),
+    dislikes: admin.firestore.FieldValue.arrayRemove(req.uid),
+  });
+
+  res.json({ success: true });
+});
+
+app.put("/blogs/:id/dislike", verifyToken, async (req, res) => {
+  const ref = db.collection("blogs").doc(req.params.id);
+
+  await ref.update({
+    dislikes: admin.firestore.FieldValue.arrayUnion(req.uid),
+    likes: admin.firestore.FieldValue.arrayRemove(req.uid),
+  });
+
+  res.json({ success: true });
+});
+
+app.put("/blogs/:id/edit", verifyToken, async (req, res) => {
+  const ref = db.collection("blogs").doc(req.params.id);
+  const snap = await ref.get();
+
+  if (!snap.exists) return res.status(404).json({ error: "Not found" });
+
+  if (snap.data().authorId !== req.uid)
+    return res.status(403).json({ error: "Not allowed" });
+
+  await ref.update({
+    ...req.body,
+    updatedAt: admin.firestore.FieldValue.serverTimestamp()
+  });
+
+  res.json({ success: true });
+});
+
+app.delete("/blogs/:id", verifyToken, async (req, res) => {
+  const ref = db.collection("blogs").doc(req.params.id);
+  const snap = await ref.get();
+
+  if (!snap.exists) return res.status(404).json({ error: "Not found" });
+  if (snap.data().authorId !== req.uid)
+    return res.status(403).json({ error: "Not allowed" });
+
+  await ref.delete();
+  res.json({ success: true });
+});
+
+app.get("/blogs/:id/comments", async (req, res) => {
+  const snap = await db
+    .collection("blogs")
+    .doc(req.params.id)
+    .collection("comments")
+    .orderBy("createdAt", "asc")
+    .get();
+
+  res.json({
+    comments: snap.docs.map(d => ({
+      id: d.id,
+      ...d.data(),
+      createdAt: d.data().createdAt?.toMillis() || null
+    }))
+  });
+});
+
+app.post("/blogs/:id/comments", verifyToken, async (req, res) => {
+  await db
+    .collection("blogs")
+    .doc(req.params.id)
+    .collection("comments")
+    .add({
+      text: req.body.text,
+      authorId: req.uid,
+      createdAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+  res.json({ success: true });
 });
 
 // ⭐ ADMIN — Fetch all users

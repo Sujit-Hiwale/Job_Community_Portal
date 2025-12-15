@@ -36,31 +36,15 @@ export default function JobDetails() {
 
   // Load job from Firestore
   async function loadJob() {
-    const snap = await getDoc(doc(db, "jobs", id));
-    const data = snap.data();
+    const token = currentUser ? await currentUser.getIdToken() : null;
 
-    if (!data) return;
+    const res = await axios.get(
+      `${import.meta.env.VITE_API_URL}/jobs/${id}`,
+      token ? { headers: { Authorization: `Bearer ${token}` } } : {}
+    );
 
-    const owner = data.postedBy || data.createdBy;
-
-    setJob({
-      id: snap.id,
-      ...data,
-      owner,
-      postedAt: data.postedAt?.toDate() || new Date(),
-    });
-
-    setForm({
-      title: data.title,
-      description: data.description,
-      company: data.company,
-      location: data.location,
-      minSalary: data.minSalary,
-      maxSalary: data.maxSalary,
-      type: data.type,
-      workMode: data.workMode,
-      category: data.category || "",
-    });
+    setJob(res.data.job);
+    setForm(res.data.job);
   }
 
   const canEdit =

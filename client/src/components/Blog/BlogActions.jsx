@@ -1,8 +1,6 @@
-// src/components/Blog/BlogActions.jsx
 import { useState } from "react";
-import { db } from "../../firebase/firebaseConfig";
 import { useAuth } from "../../context/AuthContext";
-import { doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 export default function BlogActions({ type, blog, refresh }) {
@@ -11,98 +9,80 @@ export default function BlogActions({ type, blog, refresh }) {
   const [editMode, setEditMode] = useState(false);
   const [tempBlog, setTempBlog] = useState(blog);
 
-  const blogRef = doc(db, "blogs", blog.id);
+  async function authHeader() {
+    return {
+      headers: {
+        Authorization: `Bearer ${await currentUser.getIdToken()}`
+      }
+    };
+  }
 
-  // ---------------- LIKE / DISLIKE WITH SINGLE ACTION LOGIC ---------------- //
   async function likeBlog() {
     if (!currentUser) return navigate("/auth/login");
-
-    const uid = currentUser.uid;
-    const hasLiked = blog.likes?.includes(uid);
-    const hasDisliked = blog.dislikes?.includes(uid);
-
-    if (hasLiked) {
-      // Remove like if user clicks again
-      await updateDoc(blogRef, { likes: arrayRemove(uid) });
-    } else {
-      // Add like
-      await updateDoc(blogRef, { likes: arrayUnion(uid) });
-
-      // Remove dislike if previously disliked
-      if (hasDisliked) {
-        await updateDoc(blogRef, { dislikes: arrayRemove(uid) });
-      }
-    }
-
+    await axios.put(
+      `${import.meta.env.VITE_API_URL}/blogs/${blog.id}/like`,
+      {},
+      await authHeader()
+    );
     refresh();
   }
 
   async function dislikeBlog() {
     if (!currentUser) return navigate("/auth/login");
-
-    const uid = currentUser.uid;
-    const hasLiked = blog.likes?.includes(uid);
-    const hasDisliked = blog.dislikes?.includes(uid);
-
-    if (hasDisliked) {
-      // Remove dislike if user clicks again
-      await updateDoc(blogRef, { dislikes: arrayRemove(uid) });
-    } else {
-      // Add dislike
-      await updateDoc(blogRef, { dislikes: arrayUnion(uid) });
-
-      // Remove like if previously liked
-      if (hasLiked) {
-        await updateDoc(blogRef, { likes: arrayRemove(uid) });
-      }
-    }
-
+    await axios.put(
+      `${import.meta.env.VITE_API_URL}/blogs/${blog.id}/dislike`,
+      {},
+      await authHeader()
+    );
     refresh();
   }
 
-  // ---------------- EDIT BLOG ---------------- //
   async function saveChanges() {
-    await updateDoc(blogRef, {
-      title: tempBlog.title,
-      content: tempBlog.content,
-      image: tempBlog.image,
-      updatedAt: new Date(),
-    });
+    await axios.put(
+      `${import.meta.env.VITE_API_URL}/blogs/${blog.id}/edit`,
+      {
+        title: tempBlog.title,
+        content: tempBlog.content,
+        image: tempBlog.image
+      },
+      await authHeader()
+    );
     setEditMode(false);
     refresh();
   }
 
   async function deleteBlog() {
-    if (confirm("Delete this blog?")) {
-      await deleteDoc(blogRef);
-      window.location.href = "/blog";
-    }
+    if (!confirm("Delete this blog?")) return;
+    await axios.delete(
+      `${import.meta.env.VITE_API_URL}/blogs/${blog.id}`,
+      await authHeader()
+    );
+    navigate("/blog");
   }
 
-  // ---------------- UI RENDERING ---------------- //
   if (type === "likes") {
     const uid = currentUser?.uid;
 
     return (
       <div className="flex gap-4 mb-8">
-        {/* LIKE BUTTON */}
         <button
           onClick={likeBlog}
-          className={`px-4 py-2 rounded 
-            ${uid && blog.likes?.includes(uid)
+          className={`px-4 py-2 rounded ${
+            uid && blog.likes?.includes(uid)
               ? "bg-green-700 text-white"
-              : "bg-green-500 text-white"}`}
+              : "bg-green-500 text-white"
+          }`}
         >
           👍 Like ({blog.likes?.length || 0})
         </button>
 
-        {/* DISLIKE BUTTON */}
         <button
           onClick={dislikeBlog}
-          className={`px-4 py-2 rounded 
-            ${uid && blog.dislikes?.includes(uid)
+          className={`px-4 py-2 rounded ${
+            uid && blog.dislikes?.includes(uid)
               ? "bg-orange-700 text-white"
-              : "bg-orange-500 text-white"}`}
+              : "bg-orange-500 text-white"
+          }`}
         >
           👎 Dislike ({blog.dislikes?.length || 0})
         </button>
@@ -110,35 +90,33 @@ export default function BlogActions({ type, blog, refresh }) {
     );
   }
 
-  // ------ Only author sees edit/delete ------ //
   if (type === "edit-delete") {
     if (editMode) {
       return (
-        <div className="p-4 bg-gray-100 rounded-md mb-10">
+        <div className="mb-10">
           <input
-            className="border p-2 w-full mb-3"
+            className="border p-2 w-full mb-2"
             value={tempBlog.title}
-            onChange={(e) => setTempBlog({ ...tempBlog, title: e.target.value })}
+            onChange={(e) =>
+              setTempBlog({ ...tempBlog, title: e.target.value })
+            }
           />
-
           <textarea
-            className="border p-2 w-full mb-3"
+            className="border p-2 w-full mb-2"
             rows="5"
             value={tempBlog.content}
             onChange={(e) =>
               setTempBlog({ ...tempBlog, content: e.target.value })
             }
           />
-
           <input
-            className="border p-2 w-full mb-3"
-            placeholder="Cover Image URL"
-            value={tempBlog.image}
+            className="border p-2 w-full mb-2"
+            placeholder="Image URL"
+            value={tempBlog.image || ""}
             onChange={(e) =>
               setTempBlog({ ...tempBlog, image: e.target.value })
             }
           />
-
           <div className="flex gap-3">
             <button
               onClick={saveChanges}
@@ -165,7 +143,6 @@ export default function BlogActions({ type, blog, refresh }) {
         >
           Edit
         </button>
-
         <button
           onClick={deleteBlog}
           className="bg-red-600 text-white px-4 py-2 rounded"

@@ -23,34 +23,17 @@ export default function CreateJob() {
 
   // ⭐ Auto-fill company + location
   useEffect(() => {
-    const fetchCompanyInfo = async () => {
-      try {
-        if (!currentUser) return;
+    async function loadCompany() {
+      const token = await currentUser.getIdToken();
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL}/me/company`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-        const userDocRef = doc(db, "users", currentUser.uid);
-        const userSnap = await getDoc(userDocRef);
-
-        if (!userSnap.exists()) return;
-
-        const userData = userSnap.data();
-        const companyId = userData.companyId;
-        if (!companyId) return;
-
-        const companyDocRef = doc(db, "companies", companyId);
-        const companySnap = await getDoc(companyDocRef);
-
-        if (!companySnap.exists()) return;
-
-        const companyData = companySnap.data();
-
-        setCompany(companyData.name || "");
-        setLocation(companyData.address || "");
-      } catch (err) {
-        console.error("Failed to fetch company info:", err);
-      }
-    };
-
-    fetchCompanyInfo();
+      setCompany(res.data.name);
+      setLocation(res.data.address);
+    }
+    if (currentUser) loadCompany();
   }, [currentUser]);
 
   if (userRole !== "recruiter" && userRole !== "company") {
