@@ -1709,6 +1709,131 @@ app.get("/company/:id", async (req, res) => {
   }
 });
 
+app.get(
+  "/company/:companyId/team",
+  verifyToken,
+  loadUserRole,
+  async (req, res) => {
+    try {
+      const { companyId } = req.params;
+
+      // 🔒 Ensure user belongs to this company
+      if (req.user.companyId !== companyId) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+
+      const employeesSnap = await db
+        .collection("companies")
+        .doc(companyId)
+        .collection("employees")
+        .get();
+
+      const employees = employeesSnap.docs.map((doc) => ({
+        uid: doc.id,
+        ...doc.data(),
+        joinedAt: doc.data().joinedAt?.toMillis() || null,
+      }));
+
+      return res.json({ employees });
+    } catch (err) {
+      console.error("Fetch team error:", err);
+      return res.status(500).json({ error: "Failed to load team" });
+    }
+  }
+);
+
+app.get(
+  "/company/:companyId/team",
+  verifyToken,
+  loadUserRole,
+  async (req, res) => {
+    try {
+      const { companyId } = req.params;
+
+      // 🔒 Ensure user belongs to this company
+      if (req.user.companyId !== companyId) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+
+      const employeesSnap = await db
+        .collection("companies")
+        .doc(companyId)
+        .collection("employees")
+        .get();
+
+      const employees = employeesSnap.docs.map((doc) => ({
+        uid: doc.id,
+        ...doc.data(),
+        joinedAt: doc.data().joinedAt?.toMillis() || null,
+      }));
+
+      return res.json({ employees });
+    } catch (err) {
+      console.error("Fetch team error:", err);
+      return res.status(500).json({ error: "Failed to load team" });
+    }
+  }
+);
+
+app.delete(
+  "/company/:companyId/team/:userId",
+  verifyToken,
+  loadUserRole,
+  requireCompanyOwner,
+  async (req, res) => {
+    try {
+      const { companyId, userId } = req.params;
+
+      // must belong to same company
+      if (req.user.companyId !== companyId) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+
+      // ❌ cannot delete yourself
+      if (req.uid === userId) {
+        return res.status(400).json({ error: "You cannot remove yourself" });
+      }
+
+      const empRef = db
+        .collection("companies")
+        .doc(companyId)
+        .collection("employees")
+        .doc(userId);
+
+      const empSnap = await empRef.get();
+
+      if (!empSnap.exists) {
+        return res.status(404).json({ error: "Employee not found" });
+      }
+
+      const empData = empSnap.data();
+
+      // ❌ cannot delete owner
+      if (empData.companyRole === "owner") {
+        return res.status(400).json({
+          error: "Owner cannot be removed. Change role first.",
+        });
+      }
+
+      // delete from company employees
+      await empRef.delete();
+
+      // update user doc
+      await db.collection("users").doc(userId).update({
+        companyId: null,
+        companyName: null,
+        companyRole: null,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      return res.json({ success: true });
+    } catch (err) {
+      console.error("Remove member error:", err);
+      return res.status(500).json({ error: "Failed to remove member" });
+    }
+  }
+);
+
 app.get("/company/:id/analytics", async (req, res) => {
   try {
     const companyId = req.params.id;
