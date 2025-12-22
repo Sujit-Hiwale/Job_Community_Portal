@@ -1,8 +1,10 @@
-// src/components/Blog/BlogCard.jsx
 import { Link } from "react-router-dom";
 import { User, Calendar, ArrowRight } from "lucide-react";
+import { formatBlogTime } from "../../utils/date";
 
 export default function BlogCard({ blog }) {
+  
+              console.log("createdAt raw:", blog.createdAt);
   return (
     <Link
       to={`/blog/${blog.id}`}
@@ -41,12 +43,7 @@ export default function BlogCard({ blog }) {
           {blog.createdAt && (
             <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
               <Calendar className="w-4 h-4" />
-              <span>
-                {new Date(blog.createdAt).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                })}
-              </span>
+              <span>{formatBlogTime(blog.createdAt)}</span>
             </div>
           )}
         </div>

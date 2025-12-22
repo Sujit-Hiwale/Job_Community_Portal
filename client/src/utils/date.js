@@ -31,3 +31,39 @@ export function timeAgo(input) {
 
   return "just now";
 }
+
+function normalizeToDate(input) {
+  if (!input) return null;
+
+  if (input instanceof Date) return input;
+  if (typeof input === "number") return new Date(input);
+  if (typeof input === "string") return new Date(input);
+
+  // Firestore Admin SDK
+  if (input._seconds) return new Date(input._seconds * 1000);
+  if (input.seconds) return new Date(input.seconds * 1000);
+
+  return null;
+}
+
+export function formatBlogTime(input) {
+  const date = normalizeToDate(input);
+  if (!date || isNaN(date.getTime())) return "Just now";
+
+  const diffMs = Date.now() - date.getTime();
+  const diffSeconds = Math.floor(diffMs / 1000);
+
+  if (diffSeconds < 60) return "Just now";
+
+  const diffMinutes = Math.floor(diffSeconds / 60);
+  if (diffMinutes < 60) return `${diffMinutes} min ago`;
+
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+
+  return date.toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
