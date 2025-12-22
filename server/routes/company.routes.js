@@ -1,6 +1,6 @@
 import express from "express";
 import { db, admin } from "../config/firebase.js";
-import { verifyToken } from "../middleware/auth.js";
+import { verifyToken, verifyTokenOptional } from "../middleware/auth.js";
 import { loadUserRole, requireCompanyOwner } from "../middleware/roles.js";
 
 const router = express.Router();
@@ -24,7 +24,7 @@ router.get("/companies", async (req, res) => {
       // Count open jobs
       const jobsSnap = await db
         .collection("jobs")
-        .where("company", "==", data.name)
+        .where("companyId", "==", doc.id)
         .get();
 
       companies.push({
@@ -48,7 +48,7 @@ router.get("/companies", async (req, res) => {
   }
 });
 
-router.get("/company/:id", async (req, res) => {
+router.get("/company/:id", verifyTokenOptional, async (req, res) => {
   try {
     const companyId = req.params.id;
 
@@ -78,7 +78,7 @@ router.get("/company/:id", async (req, res) => {
     // 4️⃣ Fetch open jobs
     const jobsSnap = await db
       .collection("jobs")
-      .where("companyId", "==", doc.id)
+      .where("companyId", "==", companyId)
       .get();
 
     const jobs = jobsSnap.docs.map((d) => ({
@@ -92,7 +92,7 @@ router.get("/company/:id", async (req, res) => {
         id: company.id,
         name: company.name || "",
         logoUrl: company.logoUrl || null,
-        owners: company.owners || [],
+        owners: company.owners || (company.ownerId ? [company.ownerId] : []),
         status: company.status || "pending",
         address: company.address || null,
         description: company.description || "",
@@ -304,40 +304,45 @@ router.get("/company/users", verifyToken, loadUserRole, requireCompanyOwner, asy
   }
 });
 
-router.put("/company/update-user-role",
-  verifyToken, loadUserRole, requireCompanyOwner,
-  async (req, res) => {
+router.put("/company/update-user-role", verifyToken, loadUserRole, requireCompanyOwner, async (req, res) => {
     try {
       const { userId, newRole } = req.body;
 
-      if (!userId || !newRole)
-        return res.status(400).json({ error: "Missing fields" });
+      const ALLOWED_ROLES = ["employee", "recruiter", "hr"];
 
-      // Ensure the targeted user belongs to same company
-      const targetSnap = await db.collection("users").doc(userId).get();
-      if (!targetSnap.exists) return res.status(404).json({ error: "User not found" });
-
-      const target = targetSnap.data();
-      if (target.companyName !== req.user.companyName) {
-        return res.status(403).json({ error: "You cannot modify someone outside your company" });
+      if (!ALLOWED_ROLES.includes(newRole)) {
+        return res.status(400).json({ error: "Invalid role" });
       }
 
-      await db.collection("users").doc(userId).update({
-        companyRole: newRole, // company-scoped role
+      const companyId = req.user.companyId;
+
+      // 🔹 Update company employee role
+      const empRef = db
+        .collection("companies")
+        .doc(companyId)
+        .collection("employees")
+        .doc(userId);
+
+      const empSnap = await empRef.get();
+      if (!empSnap.exists) {
+        return res.status(404).json({ error: "Employee not found" });
+      }
+
+      await empRef.update({
+        companyRole: newRole,
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
 
-      await createNotification(
-        userId,
-        "Company Role Updated",
-        `Your company role has been changed to '${newRole}'.`,
-        "company-role-updated"
-      );
+      // 🔹 Sync role to user doc (optional but recommended)
+      await db.collection("users").doc(userId).update({
+        companyRole: newRole,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
 
       return res.json({ success: true });
     } catch (err) {
-      console.error("Company modify role error:", err);
-      return res.status(500).json({ error: "Role change failed" });
+      console.error("Role update error:", err);
+      return res.status(500).json({ error: "Failed to update role" });
     }
   }
 );

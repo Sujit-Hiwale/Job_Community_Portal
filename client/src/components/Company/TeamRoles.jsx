@@ -10,19 +10,19 @@ const ROLE_META = {
   assistant: { label: "Assistant", icon: "👤" },
 };
 
-export default function TeamRoles() {
-  const { profile, currentUser } = useAuth();
+export default function TeamRoles({ companyProfile }) {
+  const { currentUser } = useAuth();
   const [team, setTeam] = useState([]);
   const [company, setCompany] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!profile?.companyId || !currentUser) {
+    if (!companyProfile?.companyId || !currentUser) {
       setLoading(false);
       return;
     }
     fetchAll();
-  }, [profile, currentUser]);
+  }, [currentUser]);
 
   async function fetchAll() {
     try {
@@ -30,11 +30,11 @@ export default function TeamRoles() {
 
       const [teamRes, companyRes] = await Promise.all([
         axios.get(
-          `http://localhost:5000/company/${profile.companyId}/team`,
+          `http://localhost:5000/company/${companyProfile.companyId}/team`,
           { headers: { Authorization: `Bearer ${token}` } }
         ),
         axios.get(
-          `http://localhost:5000/company/${profile.companyId}`,
+          `http://localhost:5000/company/${companyProfile.companyId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         ),
       ]);
@@ -74,7 +74,7 @@ export default function TeamRoles() {
     const token = await currentUser.getIdToken();
 
     await axios.delete(
-      `http://localhost:5000/company/${profile.companyId}/team/${userId}`,
+      `http://localhost:5000/company/${companyProfile.companyId}/team/${userId}`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
 
@@ -119,7 +119,7 @@ export default function TeamRoles() {
                       }
                       className="border px-2 py-1 rounded"
                     >
-                      <option value="assistant">Assistant</option>
+                      <option value="employee">Employee</option>
                       <option value="recruiter">Recruiter</option>
                       <option value="hr">HR Manager</option>
                     </select>
