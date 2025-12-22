@@ -442,7 +442,11 @@ export default function AdminPage() {
               {companies.map((c) => (
                 <div key={c.id} className="border border-gray-200 dark:border-gray-700 p-3 rounded-lg">
                   <p className="font-medium text-gray-900 dark:text-gray-100">{c.name}</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Owner ID: {c.owners?.[0]}</p>
+                  {c.owners?.[0] && (
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      Owner: {users.find(u => u.uid === c.owners[0])?.name || 'Unknown'}
+                    </p>
+                  )}
 
                   <div className="flex gap-2 mt-3">
                     <button
