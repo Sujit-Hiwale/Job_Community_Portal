@@ -106,13 +106,14 @@ export default function PublicProfile() {
 
         {/* Company */}
         {company && (
-          <div className="bg-white rounded-xl shadow p-6 mb-6">
+          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
             <p className="text-sm text-gray-500 mb-1">Company</p>
             <div className="flex items-center gap-4">
               {company.logoUrl && (
                 <img
                   src={company.logoUrl}
-                  className="w-14 h-14 rounded-lg"
+                  alt="Company Logo"
+                  className="w-14 h-14 rounded-lg object-cover"
                 />
               )}
               <h3 className="text-xl font-semibold">{company.name}</h3>
@@ -120,32 +121,122 @@ export default function PublicProfile() {
           </div>
         )}
 
-        {/* Professional Info */}
-        <div className="bg-white rounded-xl shadow p-6">
-          <h2 className="text-lg font-bold mb-4">Professional Details</h2>
+        {/* Profile Information Grid */}
+        <div className="grid md:grid-cols-2 gap-6 mb-6">
+          {/* Contact Information Card */}
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Contact Information
+            </h2>
+            <div className="space-y-4">
+              {profile?.email && (
+                <div className="flex items-start gap-3">
+                  <svg className="w-5 h-5 text-gray-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  <div>
+                    <p className="text-sm text-gray-500 font-medium">Email</p>
+                    <p className="text-gray-900">{profile.email}</p>
+                  </div>
+                </div>
+              )}
 
-          {profile.experience && (
-            <p className="mb-2">
-              <strong>Experience:</strong>{" "}
-              {typeof profile.experience === "object"
-                ? `${profile.experience.value} ${profile.experience.unit}`
-                : profile.experience}
-            </p>
-          )}
+              {profile?.mobile && (
+                <div className="flex items-start gap-3">
+                  <svg className="w-5 h-5 text-gray-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                  <div>
+                    <p className="text-sm text-gray-500 font-medium">Mobile</p>
+                    <p className="text-gray-900">{profile.mobile}</p>
+                  </div>
+                </div>
+              )}
 
-          {profile.gender && (
-            <p>
-              <strong>Gender:</strong> {profile.gender}
-            </p>
-          )}
+              {profile?.address && (
+                <div className="flex items-start gap-3">
+                  <svg className="w-5 h-5 text-gray-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <div>
+                    <p className="text-sm text-gray-500 font-medium">Address</p>
+                    <p className="text-gray-900">{profile.address}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
 
-          <p className="text-sm text-gray-500 mt-4">
-            Member since{" "}
-            {profile.createdAt
-              ? formatBlogTime(profile.createdAt)
-              : "Recently joined"}
-          </p>
-        </div>      
+          {/* Professional Information Card */}
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              Professional Details
+            </h2>
+            <div className="space-y-4">
+              {profile?.position && (
+                <div className="flex items-start gap-3">
+                  <svg className="w-5 h-5 text-gray-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <div>
+                    <p className="text-sm text-gray-500 font-medium">Position</p>
+                    <p className="text-gray-900 font-semibold">{profile.position}</p>
+                  </div>
+                </div>
+              )}
+
+              {profile?.experience && (
+                <div className="flex items-start gap-3">
+                  <svg className="w-5 h-5 text-gray-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div>
+                    <p className="text-sm text-gray-500 font-medium">Experience</p>
+                    <p className="text-gray-900">
+                      {typeof profile.experience === "object"
+                        ? `${profile.experience.value} ${profile.experience.unit}`
+                        : profile.experience}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {profile?.gender && (
+                <div className="flex items-start gap-3">
+                  <svg className="w-5 h-5 text-gray-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  <div>
+                    <p className="text-sm text-gray-500 font-medium">Gender</p>
+                    <p className="text-gray-900 capitalize">{profile.gender}</p>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-start gap-3">
+                <svg className="w-5 h-5 text-gray-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <div>
+                  <p className="text-sm text-gray-500 font-medium">Member Since</p>
+                  <p className="text-gray-900">
+                    {profile?.createdAt
+                      ? formatBlogTime(profile.createdAt)
+                      : "Recently joined"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      
       </div>
     </div>
   );
