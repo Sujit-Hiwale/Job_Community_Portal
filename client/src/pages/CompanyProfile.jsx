@@ -36,7 +36,6 @@ export default function CompanyProfile() {
 
   const fetchCompanyData = async () => {
     try {
-      // Fetch company profile data
       const response = await axios.get(
         `http://localhost:5000/company/${companyId}`
       );
@@ -46,56 +45,6 @@ export default function CompanyProfile() {
       setLoading(false);
     } catch (error) {
       console.error("Error fetching company data:", error);
-      // Use mock data based on companyId
-      const mockCompanies = {
-        "1": {
-          id: "1",
-          name: "Tech Innovators Inc",
-          logo: null,
-          industry: "Technology",
-          location: "San Francisco, CA",
-          employeeCount: "100-500",
-          followers: 2500,
-          foundedYear: "2015",
-          about: "Tech Innovators Inc is a leading technology company specializing in cutting-edge software solutions. We focus on innovation, creativity, and delivering exceptional results for our clients worldwide.",
-          mission: "To empower businesses through innovative technology solutions that drive growth and efficiency.",
-          vision: "To be the global leader in transformative technology, shaping the future of digital innovation.",
-          values: "Integrity, Innovation, Excellence, Collaboration, and Customer Focus.",
-          website: "https://techinnovators.com",
-          linkedin: "https://linkedin.com/company/techinnovators",
-          instagram: "https://instagram.com/techinnovators",
-          twitter: "https://twitter.com/techinnovators",
-          email: "contact@techinnovators.com",
-          contactInfo: {
-            phone: "+1 (555) 123-4567",
-            address: "123 Tech Street, San Francisco, CA 94102",
-          },
-        },
-        "2": {
-          id: "2",
-          name: "HealthCare Solutions",
-          logo: null,
-          industry: "Healthcare",
-          location: "New York, NY",
-          employeeCount: "500-1000",
-          followers: 1800,
-          foundedYear: "2010",
-          about: "HealthCare Solutions provides innovative healthcare technology and services to improve patient outcomes and streamline healthcare operations.",
-          mission: "Transforming healthcare through technology and compassionate care.",
-          vision: "A healthier world through accessible and innovative healthcare solutions.",
-          values: "Compassion, Excellence, Innovation, Integrity, and Teamwork.",
-          website: "https://healthcaresolutions.com",
-          linkedin: "https://linkedin.com/company/healthcaresolutions",
-          email: "info@healthcaresolutions.com",
-          contactInfo: {
-            phone: "+1 (555) 234-5678",
-            address: "456 Health Ave, New York, NY 10001",
-          },
-        },
-      };
-      
-      setCompany(mockCompanies[companyId] || mockCompanies["1"]);
-      setFollowersCount(mockCompanies[companyId]?.followers || 2500);
       setLoading(false);
     }
   };
@@ -227,7 +176,7 @@ export default function CompanyProfile() {
                     </div>
                     <div className="flex items-center gap-2">
                       <MapPin className="w-4 h-4" />
-                      <span>{company.location || "Location"}</span>
+                      <span>{company.address || "Location"}</span>
                     </div>
                   </div>
                 </div>

@@ -22,29 +22,6 @@ export default function CompanyPage() {
       setLoading(false);
     } catch (err) {
       console.error("Error:", err);
-      // Add mock contact info if not available
-      const mockCompany = {
-        company: {
-          name: "Tech Company",
-          industry: "Technology",
-          location: "San Francisco, CA",
-          description: "A leading technology company focused on innovation and excellence.",
-          status: "active",
-          website: "https://example.com",
-          linkedin: "https://linkedin.com/company/example",
-          instagram: "https://instagram.com/example",
-          twitter: "https://twitter.com/example",
-          email: "contact@company.com",
-          phone: "+1 (555) 123-4567",
-          address: "123 Tech Street, San Francisco, CA 94102",
-          logoUrl: null,
-          createdAt: { toDate: () => new Date() },
-          updatedAt: { toDate: () => new Date() }
-        },
-        employeesCount: 250,
-        openJobs: 0
-      };
-      setCompany(mockCompany);
       setLoading(false);
     }
   };
@@ -77,7 +54,7 @@ export default function CompanyPage() {
               </p>
               <p className="text-gray-600 dark:text-gray-400 flex items-center gap-2">
                 <MapPin className="w-4 h-4" />
-                {data.location || "No location specified"}
+                {data.address || "No location specified"}
               </p>
             </div>
           </div>

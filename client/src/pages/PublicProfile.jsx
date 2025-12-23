@@ -116,7 +116,12 @@ export default function PublicProfile() {
                   className="w-14 h-14 rounded-lg object-cover"
                 />
               )}
-              <h3 className="text-xl font-semibold">{company.name}</h3>
+              <h3
+                onClick={() => navigate(`/company/${company.id}`)}
+                className="text-xl font-semibold cursor-pointer hover:underline hover:text-blue-600 transition-colors"
+              >
+                {company.name}
+              </h3>
             </div>
           </div>
         )}
