@@ -4,7 +4,7 @@ import { auth } from "../firebase/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import axios from "axios";
 import { 
-  BarChart3, Users, Briefcase, Calendar, Settings, Bell, LogOut, Home
+  BarChart3, Briefcase, Settings, Bell
 } from "lucide-react";
 import CompanyAnalytics from "../components/Company/CompanyAnalytics";
 import TeamRoles from "../components/Company/TeamRoles";

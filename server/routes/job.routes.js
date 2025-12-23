@@ -173,7 +173,6 @@ router.put("/jobs/:id/edit", verifyToken, loadUserRole, async (req, res) => {
     const updatedFields = {
       title: title ?? job.title,
       description: description ?? job.description,
-      company: company ?? job.company,
       location: location ?? job.location,
       minSalary: minSalary ?? job.minSalary,
       maxSalary: maxSalary ?? job.maxSalary,
@@ -244,46 +243,34 @@ router.delete("/jobs/:id", verifyToken, loadUserRole, async (req, res) => {
   }
 });
 
-router.put("/jobs/:id/apply", verifyToken, async (req, res) => {
+router.put("/jobs/:id/apply", verifyToken, loadUserRole, async (req, res) => {
   try {
     const jobRef = db.collection("jobs").doc(req.params.id);
     const jobSnap = await jobRef.get();
 
-    if (!jobSnap.exists) {
+    if (!jobSnap.exists)
       return res.status(404).json({ error: "Job not found" });
-    }
 
     const job = jobSnap.data();
 
-    // 🔥 FETCH COMPANY ID PROPERLY
-    const companySnap = await db
-      .collection("companies")
-      .where("name", "==", job.company)
-      .limit(1)
-      .get();
-
-    if (companySnap.empty) {
-      return res.status(400).json({ error: "Company not found" });
+    // ❌ Prevent duplicate apply
+    if (job.appliedBy?.includes(req.uid)) {
+      return res.status(400).json({ error: "Already applied" });
     }
 
-    const companyId = companySnap.docs[0].id;
-
-    // 🔥 CREATE APPLICATION
     await db.collection("applications").add({
       applicantId: req.uid,
       applicantName: req.user.name,
       applicantEmail: req.user.email,
       jobId: req.params.id,
       jobTitle: job.title,
-      companyId,                 // ✅ FIX
-      companyName: job.company,
-      resumeUrl: req.body.resumeUrl || null,
+      companyId: job.companyId,        // ✅ DIRECT
+      companyName: job.companyName,    // ✅ DIRECT
       status: "Applied",
       appliedAt: admin.firestore.FieldValue.serverTimestamp(),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-    // (optional helper field)
     await jobRef.update({
       appliedBy: admin.firestore.FieldValue.arrayUnion(req.uid),
     });
@@ -296,13 +283,28 @@ router.put("/jobs/:id/apply", verifyToken, async (req, res) => {
 });
 
 router.put("/jobs/:id/save", verifyToken, async (req, res) => {
-  const jobRef = db.collection("jobs").doc(req.params.id);
+  try {
+    const jobRef = db.collection("jobs").doc(req.params.id);
+    const snap = await jobRef.get();
 
-  await jobRef.update({
-    savedBy: admin.firestore.FieldValue.arrayUnion(req.uid)
-  });
+    if (!snap.exists)
+      return res.status(404).json({ error: "Job not found" });
 
-  res.json({ success: true });
+    const job = snap.data();
+    const isSaved = job.savedBy?.includes(req.uid);
+
+    await jobRef.update({
+      savedBy: isSaved
+        ? admin.firestore.FieldValue.arrayRemove(req.uid)
+        : admin.firestore.FieldValue.arrayUnion(req.uid),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    res.json({ saved: !isSaved });
+  } catch (err) {
+    console.error("Save job error:", err);
+    res.status(500).json({ error: "Failed to save job" });
+  }
 });
 
 router.put("/jobs/:id/view", async (req, res) => {
@@ -336,7 +338,7 @@ router.get("/company/job-views/total", verifyToken, loadUserRole, async (req, re
 
     const jobsSnap = await db
       .collection("jobs")
-      .where("company", "==", req.user.companyName)
+      .where("companyId", "==", req.user.companyId)
       .get();
 
     let totalViews = 0;
@@ -368,7 +370,7 @@ router.get("/search-jobs", async (req, res) => {
     if (r.trim()) {
       jobs = jobs.filter(job =>
         job.title?.toLowerCase().includes(r) ||
-        job.company?.toLowerCase().includes(r) ||
+        job.companyName?.toLowerCase().includes(r) ||
         job.category?.toLowerCase().includes(r)
       );
     }

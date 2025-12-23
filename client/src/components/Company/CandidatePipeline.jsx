@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { Users } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const STAGES = [
   "Applied",
@@ -25,6 +26,7 @@ export default function CandidatePipeline({ companyProfile }) {
   const { currentUser } = useAuth();
   const [pipeline, setPipeline] = useState({});
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadPipeline = async () => {
@@ -81,16 +83,28 @@ export default function CandidatePipeline({ companyProfile }) {
 
     const movedApp = pipeline[fromStage].find(a => a.id === appId);
 
-    setPipeline(prev => ({
-      ...prev,
-      [fromStage]: prev[fromStage].filter(a => a.id !== appId),
-      [toStage]: [...prev[toStage], { ...movedApp, status: toStage }],
-    }));
+    setPipeline(prev => {
+      const updated = {
+        ...prev,
+        [fromStage]: prev[fromStage].filter(a => a.id !== appId),
+      };
+
+      if (toStage !== "Hired" && toStage !== "Rejected") {
+        updated[toStage] = [...prev[toStage], { ...movedApp, status: toStage }];
+      }
+
+      return updated;
+    });
 
     try {
       await axios.put(
         `${import.meta.env.VITE_API_URL}/applications/${appId}/status`,
-        { status: toStage }
+        { status: toStage },
+        {
+          headers: {
+            Authorization: `Bearer ${await currentUser.getIdToken()}`,
+          },
+        }
       );
     } catch (err) {
       console.error("Status update failed:", err);
@@ -139,8 +153,11 @@ export default function CandidatePipeline({ companyProfile }) {
                   onDragStart={e => handleDragStart(e, app, stage)}
                   className="bg-white dark:bg-gray-800 rounded-lg p-3 shadow cursor-move border"
                 >
-                  <h3 className="font-semibold text-sm">
-                    {app.candidateName}
+                  <h3
+                    onClick={() => navigate(`/users/${app.applicantId}`)}
+                    className="font-semibold text-sm text-blue-600 hover:underline cursor-pointer"
+                  >
+                    {app.applicantName}
                   </h3>
                   <p className="text-xs text-gray-500 mt-1">
                     {app.jobTitle}
