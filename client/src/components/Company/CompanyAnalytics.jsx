@@ -106,7 +106,6 @@ export default function CompanyAnalytics({ companyProfile }) {
           borderColor: "rgb(59,130,246)",
           backgroundColor: "rgba(59,130,246,0.3)",
           tension: 0.4,
-          fill: true,
         },
       ],
     };
@@ -187,10 +186,7 @@ export default function CompanyAnalytics({ companyProfile }) {
           );
         })}
       </div>
-
-      {/* ===============================
-          🏆 TOP JOBS
-      =============================== */}
+      
       <div className="bg-white dark:bg-gray-800 shadow-lg rounded-xl p-6 border dark:border-gray-700">
         <h2 className="text-xl font-bold flex items-center gap-2 dark:text-white">
           <Award className="text-yellow-500" /> Top Performing Jobs

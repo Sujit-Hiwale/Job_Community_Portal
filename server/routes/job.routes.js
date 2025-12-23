@@ -267,6 +267,7 @@ router.put("/jobs/:id/apply", verifyToken, loadUserRole, async (req, res) => {
       companyId: job.companyId,        // ✅ DIRECT
       companyName: job.companyName,    // ✅ DIRECT
       status: "Applied",
+      archived: false,
       appliedAt: admin.firestore.FieldValue.serverTimestamp(),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });

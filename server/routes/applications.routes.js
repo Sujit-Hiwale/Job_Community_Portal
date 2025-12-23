@@ -8,8 +8,7 @@ const router = express.Router();
 /**
  * GET COMPANY APPLICATIONS (PIPELINE)
  */
-router.get(
-  "/applications/company/:companyId",
+router.get("/applications/company/:companyId",
   verifyToken,
   loadUserRole,
   requireCompanyOwner,
@@ -135,34 +134,44 @@ router.put("/applications/:id/status", verifyToken, loadUserRole, async (req, re
   }
 });
 
-router.put(
-  "/applications/:id/withdraw",
+router.put("/applications/job/:jobId/withdraw",
   verifyToken,
   async (req, res) => {
     try {
-      const appRef = db.collection("applications").doc(req.params.id);
-      const snap = await appRef.get();
+      const { jobId } = req.params;
+      const uid = req.uid;
 
-      if (!snap.exists) {
+      // 1️⃣ Find active application
+      const snap = await db
+        .collection("applications")
+        .where("jobId", "==", jobId)
+        .where("applicantId", "==", uid)
+        .where("archived", "==", false)
+        .limit(1)
+        .get();
+
+      if (snap.empty) {
         return res.status(404).json({ error: "Application not found" });
       }
 
-      const app = snap.data();
+      const appRef = snap.docs[0].ref;
 
-      // 🔒 Only applicant can withdraw
-      if (app.applicantId !== req.uid) {
-        return res.status(403).json({ error: "Not allowed" });
-      }
-
+      // 2️⃣ Archive application
       await appRef.update({
         status: "Withdrawn",
+        archived: true,
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
 
-      res.json({ success: true });
+      // 3️⃣ REMOVE user from job.appliedBy  🔥 THIS WAS MISSING
+      await db.collection("jobs").doc(jobId).update({
+        appliedBy: admin.firestore.FieldValue.arrayRemove(uid),
+      });
+
+      return res.json({ success: true });
     } catch (err) {
       console.error("Withdraw error:", err);
-      res.status(500).json({ error: "Failed to withdraw" });
+      return res.status(500).json({ error: "Failed to withdraw" });
     }
   }
 );

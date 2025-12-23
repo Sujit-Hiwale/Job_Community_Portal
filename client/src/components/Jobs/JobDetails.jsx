@@ -115,7 +115,7 @@ export default function JobDetails() {
 
     try {
       await axios.put(
-        `${import.meta.env.VITE_API_URL}/applications/${id}/withdraw`,
+        `${import.meta.env.VITE_API_URL}/applications/job/${id}/withdraw`,
         {},
         {
           headers: {
@@ -124,7 +124,6 @@ export default function JobDetails() {
         }
       );
 
-      // Refresh job data
       await loadJob();
 
       alert("Application withdrawn successfully");
