@@ -9,7 +9,6 @@ import {
 import CompanyAnalytics from "../components/Company/CompanyAnalytics";
 import TeamRoles from "../components/Company/TeamRoles";
 import CandidatePipeline from "../components/Company/CandidatePipeline";
-import CompanyNotifications from "../components/Company/CompanyNotifications";
 
 export default function CompanyDashboard() {
   const navigate = useNavigate();
@@ -56,7 +55,6 @@ export default function CompanyDashboard() {
     { id: "analytics", label: "Analytics", icon: BarChart3 },
     { id: "team-roles", label: "Team & Roles", icon: Settings },
     { id: "pipeline", label: "Candidate Pipeline", icon: Briefcase },
-    { id: "notifications", label: "Notifications", icon: Bell },
   ];
 
   const renderContent = () => {
@@ -67,8 +65,6 @@ export default function CompanyDashboard() {
         return <TeamRoles companyProfile={userProfile} />;
       case "pipeline":
         return <CandidatePipeline companyProfile={userProfile} />;
-      case "notifications":
-        return <CompanyNotifications companyProfile={userProfile} />;
       default:
         return <CompanyAnalytics companyProfile={userProfile} />;
     }
