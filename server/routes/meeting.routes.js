@@ -225,8 +225,10 @@ router.put("/admin/meetings/:id/approve", verifyToken, loadUserRole, requireAdmi
       zoomLink: joinLink,
       zoomId: meetingZoomId,
       meetingStartAt: admin.firestore.Timestamp.fromDate(meetingStartJs),
-      reminderSent: false,            // <--- for later reminder
+      reminderSent: false,
     });
+
+    res.json({ success: true, zoomLink: joinLink, meetingId: meetingZoomId });
     
     // Notify requester via email
     const transporter = nodemailer.createTransport({
@@ -244,35 +246,42 @@ router.put("/admin/meetings/:id/approve", verifyToken, loadUserRole, requireAdmi
       <p><b>Join Zoom Meeting:</b> <a href="${joinLink}">${joinLink}</a></p>
       <p>See you then.</p>
     `;
+    (async () => {
+      try {
+        await transporter.sendMail({
+          from: process.env.EMAIL,
+          to: reqData.email,
+          subject: "Your meeting is scheduled",
+          html: htmlForUser,
+        });
+      } catch (e) {
+        console.error("Email failed:", e.message);
+      }
+    })();
 
-    await transporter.sendMail({
-      from: process.env.EMAIL,
-      to: reqData.email,
-      subject: "Your meeting is scheduled",
-      html: htmlForUser,
-    });
+    (async () => {
+      try {
+        await createNotification(
+          reqData.createdBy,
+          "Meeting Approved",
+          `Your meeting request for "${reqData.purpose}" was approved. Zoom link sent.`,
+          "meeting-approved",
+          meetingId,
+          joinLink
+        );
 
-    // Notification for requester (immediate)
-    await createNotification(
-      reqData.createdBy,
-      "Meeting Approved",
-      `Your meeting request for "${reqData.purpose}" was approved. Zoom link sent.`,
-      "meeting-approved",
-      meetingId,
-      joinLink
-    );
-
-    // Notification for approving admin (immediate)
-    await createNotification(
-      req.uid,
-      "Meeting Approved",
-      `You approved meeting with ${reqData.name}. Zoom link sent.`,
-      "meeting-approved-admin",
-      meetingId,
-      "admin/meetings"
-    );
-
-    scheduleMeetingReminder(meetingId, reqData, req.uid, meetingStartJs, joinLink);
+        await createNotification(
+          req.uid,
+          "Meeting Approved",
+          `You approved meeting with ${reqData.name}. Zoom link sent.`,
+          "meeting-approved-admin",
+          meetingId,
+          "admin/meetings"
+        );
+        } catch (e) {
+        console.error("Notification failed:", e.message);
+      }
+    })();
 
     return res.json({ success: true, zoomLink: joinLink, meetingId: meetingZoomId });
   } catch (err) {

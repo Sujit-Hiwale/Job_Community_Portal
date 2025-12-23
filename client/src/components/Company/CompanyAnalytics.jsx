@@ -42,7 +42,6 @@ export default function CompanyAnalytics({ companyProfile }) {
 
     const token = localStorage.getItem("token");
 
-    // 🔹 Load main analytics
     axios
       .get(
         `${import.meta.env.VITE_API_URL}/company/${companyId}/analytics`,
@@ -51,7 +50,6 @@ export default function CompanyAnalytics({ companyProfile }) {
       .then(res => setAnalytics(res.data))
       .catch(err => console.error("Analytics load error:", err));
 
-    // 🔹 Load REAL employee growth
     axios
       .get(
         `${import.meta.env.VITE_API_URL}/company/${companyId}/employee-growth`,
@@ -69,9 +67,6 @@ export default function CompanyAnalytics({ companyProfile }) {
       </div>
     );
 
-  /* ===============================
-     📊 STATS CARDS
-  =============================== */
   const statsCards = [
     {
       title: "Total Profile Views",
@@ -93,9 +88,6 @@ export default function CompanyAnalytics({ companyProfile }) {
     },
   ];
 
-  /* ===============================
-     📈 EMPLOYEE GROWTH (REAL DATA)
-  =============================== */
   const employeeGrowthData =
     employeeGrowth && {
       labels: employeeGrowth.labels,
@@ -110,9 +102,6 @@ export default function CompanyAnalytics({ companyProfile }) {
       ],
     };
 
-  /* ===============================
-     🥧 DIVERSITY DATA
-  =============================== */
   const genderDiversityData = {
     labels: ["Male", "Female", "Other"],
     datasets: [
@@ -157,10 +146,6 @@ export default function CompanyAnalytics({ companyProfile }) {
 
   return (
     <div className="space-y-6">
-
-      {/* ===============================
-          📊 STAT CARDS
-      =============================== */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {statsCards.map((stat, i) => {
           const Icon = stat.icon;
@@ -209,50 +194,33 @@ export default function CompanyAnalytics({ companyProfile }) {
         </div>
       </div>
 
-      {/* ===============================
-          📈 EMPLOYEE GROWTH
-      =============================== */}
-      {employeeGrowthData && (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border dark:border-gray-700">
-          <h2 className="text-xl font-bold dark:text-white mb-4">
-            Employee Growth
-          </h2>
-          <Line data={employeeGrowthData} />
-        </div>
-      )}
-
-      {/* ===============================
-          🥧 DIVERSITY & INCLUSION
-      =============================== */}
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border dark:border-gray-700">
-        <h2 className="text-xl font-bold dark:text-white mb-6">
-          Diversity & Inclusion
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="h-56">
-            <Doughnut
-              data={genderDiversityData}
-              options={{ maintainAspectRatio: false }}
-            />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {employeeGrowthData && (
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border dark:border-gray-700">
+            <h2 className="text-xl font-bold dark:text-white mb-4">
+              Employee Growth
+            </h2>
+            <Line data={employeeGrowthData} />
           </div>
+        )}
 
-          <div className="h-56">
-            <Doughnut
-              data={experienceLevelData}
-              options={{ maintainAspectRatio: false }}
-            />
-          </div>
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border dark:border-gray-700 h-[350px]">
+      <h2 className="text-xl font-bold dark:text-white mb-4">
+        Diversity & Inclusion
+      </h2>
 
-          <div className="h-56">
-            <Doughnut
-              data={workModeData}
-              options={{ maintainAspectRatio: false }}
-            />
-          </div>
-        </div>
+      {/* Chart container */}
+      <div className="relative h-[calc(100%-2rem)]">
+        <Doughnut
+          data={genderDiversityData}
+          options={{
+            maintainAspectRatio: false,
+            responsive: true,
+          }}
+        />
       </div>
-
+    </div>
+      </div>
     </div>
   );
 }
