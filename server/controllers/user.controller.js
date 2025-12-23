@@ -3,6 +3,7 @@ import { db } from "../config/firebase.js";
 export const getPublicUserProfile = async (req, res) => {
   try {
     const { userId } = req.params;
+    const viewerUid = req.uid || null;
 
     const userSnap = await db.collection("users").doc(userId).get();
     if (!userSnap.exists) {
@@ -15,8 +16,11 @@ export const getPublicUserProfile = async (req, res) => {
       id: userId,
       name: user.name || "Anonymous",
       position: user.position || null,
+      email: user.email || null,
+      mobile: user.mobile || null,
       experience: user.experience || null,
       gender: user.gender || null,
+      address: user.address || null,
       createdAt: user.createdAt || null,
     };
 
