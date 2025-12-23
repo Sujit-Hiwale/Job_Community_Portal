@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { timeAgo } from "../../utils/date";
+import { formatBlogTime } from "../../utils/date";
 
 export default function JobCard({ job }) {
   const createdDate = job.postedAt?.toDate ? job.postedAt.toDate() : job.postedAt;
@@ -26,7 +26,7 @@ export default function JobCard({ job }) {
           <p>📍 {job.location}</p>
           <p>💰 {job.minSalary} - {job.maxSalary}</p>
         </div>
-        <p className="sm:ml-4">⏱ {timeAgo(createdDate)}</p>
+        <p className="sm:ml-4">⏱ {formatBlogTime(createdDate)}</p>
       </div>
     </Link>
   );

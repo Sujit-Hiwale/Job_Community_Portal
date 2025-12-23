@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { db } from "../../firebase/firebaseConfig";
 import { doc, getDoc } from "firebase/firestore";
-import { timeAgo } from "../../utils/date";
+import { formatBlogTime } from "../../utils/date";
 import { useAuth } from "../../context/AuthContext";
 import { 
   Briefcase, 
@@ -226,7 +226,7 @@ export default function JobDetails() {
                     <div className="flex flex-wrap items-center gap-4 text-blue-100">
                       <div className="flex items-center gap-2">
                         <Building2 className="w-5 h-5" />
-                        <span className="font-semibold">{job.company}</span>
+                        <span className="font-semibold">{job.companyName}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <MapPin className="w-5 h-5" />
@@ -234,7 +234,7 @@ export default function JobDetails() {
                       </div>
                       <div className="flex items-center gap-2">
                         <Calendar className="w-5 h-5" />
-                        <span>{timeAgo(job.postedAt)}</span>
+                        <span>{formatBlogTime(job.postedAt)}</span>
                       </div>
                     </div>
                   </div>
