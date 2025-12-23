@@ -74,19 +74,19 @@ router.put("/update-profile", async (req, res) => {
 
 router.get("/public/stats", async (req, res) => {
   try {
-    const snap = await db.collection("users").get();
-    const users = snap.docs.map(doc => doc.data());
+    const companiesSnap = await db.collection("companies").get();
 
-    const companyCount = users.filter(u => u.role === "company").length;
-    const jobSeekerCount = users.filter(u => u.role === "job-seeker").length;
+    const jobSeekersSnap = await db
+      .collection("users")
+      .where("role", "==", "job-seeker")
+      .get();
 
-    const jobSnap = await db.collection("jobs").get();
-    const jobCount = jobSnap.size;
+    const jobsSnap = await db.collection("jobs").get();
 
     return res.json({
-      companyCount,
-      jobSeekerCount,
-      jobCount,
+      companyCount: companiesSnap.size,
+      jobSeekerCount: jobSeekersSnap.size,
+      jobCount: jobsSnap.size,
     });
   } catch (e) {
     console.error("Stats error:", e);
