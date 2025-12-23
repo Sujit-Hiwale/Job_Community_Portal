@@ -329,7 +329,7 @@ function Profile() {
                     }`}>
                       {userRole === 'job-seeker' ? '👤 Job Seeker' :
                        userRole === 'recruiter' ? '🎯 Recruiter' :
-                       userRole === 'company' ? '🏢 Company' : '👤 User'}
+                       userRole === 'company' ? '🏢 Company' : '👤 Admin'}
                     </span>
                     {currentUser.emailVerified && (
                       <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
