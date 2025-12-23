@@ -9,6 +9,7 @@ router.get("/notifications", verifyToken, async (req, res) => {
     const snap = await db
       .collection("notifications")
       .where("userId", "==", req.uid)
+      .orderBy("createdAt", "desc")
       .get();
 
     const notifications = snap.docs.map(doc => {
@@ -39,26 +40,6 @@ router.put("/notifications/:id/read", verifyToken, async (req, res) => {
   } catch (err) {
     console.error("Mark read error:", err);
     return res.status(500).json({ error: "Failed to mark read" });
-  }
-});
-
-router.put("/notifications/read-all", verifyToken, async (req, res) => {
-  try {
-    const snap = await db.collection("notifications")
-      .where("userId", "==", req.uid)
-      .get();
-
-    const batch = db.batch();
-
-    snap.docs.forEach(doc => {
-      batch.update(doc.ref, { status: "read" });
-    });
-
-    await batch.commit();
-    return res.json({ success: true });
-  } catch (err) {
-    console.error("Mark all read error:", err);
-    return res.status(500).json({ error: "Failed to mark all read" });
   }
 });
 

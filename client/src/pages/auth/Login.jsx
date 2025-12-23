@@ -140,7 +140,7 @@ function Login() {
         </button>
 
         <p className="mt-4 text-center text-sm">
-          Don’t have an account?{" "}
+          Don't have an account?{" "}
           <Link to="/auth/register" className="text-blue-600">
             Register
           </Link>
