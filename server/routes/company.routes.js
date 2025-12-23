@@ -113,6 +113,28 @@ router.get("/company/:id", verifyTokenOptional, async (req, res) => {
   }
 });
 
+router.get("/company/:companyId/jobs", async (req, res) => {
+  try {
+    const { companyId } = req.params;
+
+    const jobsSnap = await db
+      .collection("jobs")
+      .where("companyId", "==", companyId)
+      .orderBy("postedAt", "desc")
+      .get();
+
+    const jobs = jobsSnap.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    return res.json({ jobs });
+  } catch (err) {
+    console.error("Company jobs fetch error:", err);
+    return res.status(500).json({ error: "Failed to fetch company jobs" });
+  }
+});
+
 router.get("/company/:id/analytics", async (req, res) => {
   try {
     const companyId = req.params.id;

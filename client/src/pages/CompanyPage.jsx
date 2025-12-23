@@ -12,13 +12,13 @@ export default function CompanyPage() {
 
   useEffect(() => {
     fetchCompany();
-    fetchJobs();
   }, []);
 
   const fetchCompany = async () => {
     try {
       const res = await axios.get(`http://localhost:5000/company/${id}`);
       setCompany(res.data);
+      setJobs(res.data.jobs || []);
       setLoading(false);
     } catch (err) {
       console.error("Error:", err);
@@ -46,38 +46,6 @@ export default function CompanyPage() {
       };
       setCompany(mockCompany);
       setLoading(false);
-    }
-  };
-
-  const fetchJobs = async () => {
-    try {
-      const res = await axios.get(`http://localhost:5000/jobs?companyId=${id}`);
-      setJobs(res.data.jobs || []);
-    } catch (err) {
-      console.error("Error fetching jobs:", err);
-      // Mock jobs data
-      setJobs([
-        {
-          id: "1",
-          title: "Senior Software Engineer",
-          location: "San Francisco, CA",
-          type: "Full-time",
-          experience: "5+ years",
-          salary: "$120k - $180k",
-          description: "We are looking for an experienced software engineer to join our team.",
-          skills: ["React", "Node.js", "Python", "AWS"],
-        },
-        {
-          id: "2",
-          title: "Product Manager",
-          location: "Remote",
-          type: "Full-time",
-          experience: "3-5 years",
-          salary: "$100k - $150k",
-          description: "Seeking a product manager to lead our product initiatives.",
-          skills: ["Product Strategy", "Agile", "Analytics"],
-        },
-      ]);
     }
   };
 
@@ -159,7 +127,7 @@ export default function CompanyPage() {
             </h2>
 
             {jobs.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-4 max-h-[420px] overflow-y-auto pr-2">
                 {jobs.map((job) => (
                   <div
                     key={job.id}
