@@ -9,6 +9,7 @@ import {
 import CompanyAnalytics from "../components/Company/CompanyAnalytics";
 import TeamRoles from "../components/Company/TeamRoles";
 import CandidatePipeline from "../components/Company/CandidatePipeline";
+import { API_URL } from "../config/api";
 
 export default function CompanyDashboard() {
   const navigate = useNavigate();

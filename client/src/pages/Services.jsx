@@ -1,6 +1,8 @@
 import { Briefcase, FileText, Users, TrendingUp, Target, Zap, Send, User, Building2, Mail, Phone, MessageSquare, CheckCircle } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useState, useEffect } from "react";
+import { API_URL } from "../config/api";
+
 function Services() {
   const { currentUser } = useAuth();
   const [serviceForm, setServiceForm] = useState({

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Search, Briefcase, Building2, Users, ArrowRight, MapPin, Clock, DollarSign, TrendingUp } from "lucide-react";
+import { API_URL } from "../config/api";
 
 export default function Home() {
   const navigate = useNavigate();

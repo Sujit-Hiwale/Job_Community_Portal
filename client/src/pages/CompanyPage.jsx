@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Building2, Users, MapPin, Briefcase, Globe, Linkedin, Instagram, Twitter, Mail, Phone, ExternalLink, Calendar } from "lucide-react";
+import { API_URL } from "../config/api";
 
 export default function CompanyPage() {
   const { id } = useParams();

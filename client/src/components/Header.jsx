@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { useState, useEffect, useRef } from "react";
 import { Menu, X, Sun, Moon } from "lucide-react";
+import { API_URL } from "../config/api";
 
 function Header() {
   const { currentUser } = useAuth();

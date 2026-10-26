@@ -11,6 +11,7 @@ import {
   Award,
   Globe,
 } from "lucide-react";
+import { API_URL } from "../config/api";
 
 export default function Companies() {
   const navigate = useNavigate();

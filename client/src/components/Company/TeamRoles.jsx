@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { UserCog } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { API_URL } from "../../config/api";
 
 const ROLE_META = {
   owner: { label: "Owner", icon: "👑" },

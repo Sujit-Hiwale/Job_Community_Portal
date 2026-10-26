@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { auth } from "../firebase/firebaseConfig";
+import { API_URL } from "../config/api";
 
 export default function MeetingApprovalPage() {
   const location = useLocation();

@@ -19,6 +19,7 @@ import {
   Heart,
   Mail,
 } from "lucide-react";
+import { API_URL } from "../config/api";
 
 export default function CompanyProfile() {
   const { companyId } = useParams();

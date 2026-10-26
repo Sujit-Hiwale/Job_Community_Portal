@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { auth } from "../../firebase/firebaseConfig";
 import axios from "axios";
 import { BookOpen, PenSquare, Search, User, Calendar, TrendingUp } from "lucide-react";
+import { API_URL } from "../../config/api";
 
 export default function BlogList() {
   const [blogs, setBlogs] = useState([]);

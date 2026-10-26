@@ -6,6 +6,7 @@ import axios from "axios";
 import { auth } from "../firebase/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import { BarChart3, Users, Briefcase, FileText, Calendar, TrendingUp, Activity } from "lucide-react";
+import { API_URL } from "../config/api";
 
 export default function AdminPage() {
   const navigate = useNavigate();

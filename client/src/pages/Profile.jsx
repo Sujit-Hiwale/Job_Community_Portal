@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '../firebase/firebaseConfig'
 import { formatBlogTime } from '../utils/date'
+import { API_URL } from "../config/api";
 
 function Profile() {
   const { currentUser, userRole, signOut } = useAuth()
