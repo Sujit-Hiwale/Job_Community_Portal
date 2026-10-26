@@ -32,7 +32,7 @@ export default function MeetingApprovalPage() {
         }
 
         await axios.put(
-          `http://localhost:5000/admin/meetings/${meeting.id}/approve`,
+          `${API_URL}/admin/meetings/${meeting.id}/approve`,
           { date, time },
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -46,7 +46,7 @@ export default function MeetingApprovalPage() {
         }
 
         await axios.put(
-          `http://localhost:5000/admin/meetings/${meeting.id}/decline`,
+          `${API_URL}/admin/meetings/${meeting.id}/decline`,
           { reason },
           { headers: { Authorization: `Bearer ${token}` } }
         );

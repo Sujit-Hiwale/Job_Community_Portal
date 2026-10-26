@@ -20,14 +20,14 @@ export default function BlogList() {
       if (user) {
         const token = await user.getIdToken();
         const res = await axios.post(
-          "http://localhost:5000/login",
+          `${API_URL}/login`,
           {},
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setProfile(res.data.profile);
       }
 
-      const blogsRes = await axios.get("http://localhost:5000/blogs");
+      const blogsRes = await axios.get(`${API_URL}/blogs`);
       setBlogs(blogsRes.data.blogs || []);
     } catch (err) {
       console.error(err);

@@ -30,11 +30,11 @@ export default function TeamRoles({ companyProfile }) {
 
       const [teamRes, companyRes] = await Promise.all([
         axios.get(
-          `http://localhost:5000/company/${companyProfile.companyId}/team`,
+          `${API_URL}/company/${companyProfile.companyId}/team`,
           { headers: { Authorization: `Bearer ${token}` } }
         ),
         axios.get(
-          `http://localhost:5000/company/${companyProfile.companyId}`,
+          `${API_URL}/company/${companyProfile.companyId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         ),
       ]);
@@ -56,7 +56,7 @@ export default function TeamRoles({ companyProfile }) {
     const token = await currentUser.getIdToken();
 
     await axios.put(
-      "http://localhost:5000/company/update-user-role",
+      `${API_URL}/company/update-user-role`,
       { userId, newRole },
       { headers: { Authorization: `Bearer ${token}` } }
     );
@@ -74,7 +74,7 @@ export default function TeamRoles({ companyProfile }) {
     const token = await currentUser.getIdToken();
 
     await axios.delete(
-      `http://localhost:5000/company/${companyProfile.companyId}/team/${userId}`,
+      `${API_URL}/company/${companyProfile.companyId}/team/${userId}`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
 

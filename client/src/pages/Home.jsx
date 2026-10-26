@@ -30,7 +30,7 @@ export default function Home() {
   useEffect(() => {
     const loadAllJobs = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/search-jobs");
+        const res = await axios.get(`${API_URL}/search-jobs`);
         const jobs = res.data.jobs || [];
         setAllJobs(jobs);
         setDisplayedJobs(jobs);
@@ -46,7 +46,7 @@ export default function Home() {
   useEffect(() => {
     const loadCounts = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/public/stats");
+        const res = await axios.get(`${API_URL}/public/stats`);
 
         setCompanyCount(res.data.companyCount);
         setJobSeekerCount(res.data.jobSeekerCount);
@@ -67,7 +67,7 @@ export default function Home() {
 
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:5000/search-jobs", {
+      const res = await axios.get(`${API_URL}/search-jobs`, {
         params: {
           role: search.role,
           location: search.location,
@@ -93,7 +93,7 @@ export default function Home() {
   const filterByCategory = async (categoryName) => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:5000/search-jobs", {
+      const res = await axios.get(`${API_URL}/search-jobs`, {
         params: { role: categoryName },
       });
       setDisplayedJobs(res.data.jobs || []);

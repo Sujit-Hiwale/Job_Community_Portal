@@ -23,7 +23,7 @@ export default function PublicProfile() {
     async function loadProfile() {
         try {
         const res = await axios.get(
-            `http://localhost:5000/users/${userId}/profile`
+            `${API_URL}/users/${userId}/profile`
         );
 
         setProfile(res.data.profile);
@@ -43,7 +43,7 @@ export default function PublicProfile() {
     async function loadProfile() {
       try {
         const res = await axios.get(
-          `http://localhost:5000/users/${userId}/profile`
+          `${API_URL}/users/${userId}/profile`
         );
 
         setProfile(res.data.profile);

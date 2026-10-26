@@ -95,7 +95,7 @@ function Services() {
         `.trim()
       };
 
-      const res = await fetch("http://localhost:5000/meeting-request", {
+      const res = await fetch(`${API_URL}/meeting-request`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

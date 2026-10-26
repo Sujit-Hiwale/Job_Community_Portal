@@ -124,7 +124,7 @@ function Register() {
         gender: formData.gender,
       };
 
-      await axios.post("http://localhost:5000/register", payload, {
+      await axios.post(`${API_URL}/register`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

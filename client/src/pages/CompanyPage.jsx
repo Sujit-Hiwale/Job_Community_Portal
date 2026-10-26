@@ -16,7 +16,7 @@ export default function CompanyPage() {
 
   const fetchCompany = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/company/${id}`);
+      const res = await axios.get(`${API_URL}/company/${id}`);
       setCompany(res.data);
       setJobs(res.data.jobs || []);
       setLoading(false);

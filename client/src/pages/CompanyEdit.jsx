@@ -23,7 +23,7 @@ function CompanyEdit() {
     const fetchCompany = async () => {
       try {
         const token = await currentUser.getIdToken()
-        const res = await axios.get("http://localhost:5000/user/profile", {
+        const res = await axios.get(`${API_URL}/user/profile`, {
           headers: { Authorization: `Bearer ${token}` }
         })
 
@@ -62,7 +62,7 @@ function CompanyEdit() {
 
     try {
       const token = await currentUser.getIdToken()
-      const res = await axios.put("http://localhost:5000/company/update", {
+      const res = await axios.put(`${API_URL}/company/update`, {
         name: form.name,
         address: form.address,
         description: form.description,

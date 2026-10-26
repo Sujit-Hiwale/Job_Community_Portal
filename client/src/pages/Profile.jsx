@@ -48,7 +48,7 @@ function Profile() {
         const token = await currentUser.getIdToken();
 
         const res = await axios.get(
-          "http://localhost:5000/user/profile",
+          `${API_URL}/user/profile`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -193,7 +193,7 @@ function Profile() {
 
       // PUT to your backend update route (you should implement /update-profile in server)
       // Example: axios.put('/update-profile', payload, { headers: { Authorization: `Bearer ${token}` }})
-      const response = await axios.put('http://localhost:5000/update-profile', payload, {
+      const response = await axios.put(`${API_URL}/update-profile`, payload, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -208,7 +208,7 @@ function Profile() {
       // Fetch extended profile with company info
       try {
         const token = await currentUser.getIdToken();
-        const res = await axios.get("http://localhost:5000/user/profile", {
+        const res = await axios.get(`${API_URL}/user/profile`, {
           headers: { Authorization: `Bearer ${token}` }
         });
 

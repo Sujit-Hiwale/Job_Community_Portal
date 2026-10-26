@@ -30,19 +30,19 @@ export default function AdminPage() {
   const fetchAdminData = async (token) => {
     try {
       const [usersRes, jobsRes, blogsRes, meetingsRes, companiesRes ] = await Promise.all([
-        axios.get("http://localhost:5000/admin/users", {
+        axios.get(`${API_URL}/admin/users`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        axios.get("http://localhost:5000/admin/jobs", {
+        axios.get(`${API_URL}/admin/jobs`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        axios.get("http://localhost:5000/admin/blogs", {
+        axios.get(`${API_URL}/admin/blogs`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        axios.get("http://localhost:5000/admin/meetings", {
+        axios.get(`${API_URL}/admin/meetings`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        axios.get("http://localhost:5000/admin/companies/pending", {
+        axios.get(`${API_URL}/admin/companies/pending`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -70,7 +70,7 @@ export default function AdminPage() {
 
       try {
         const profileRes = await axios.get(
-          "http://localhost:5000/user/profile",
+          `${API_URL}/user/profile`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
@@ -106,7 +106,7 @@ export default function AdminPage() {
 
     try {
       await axios.put(
-        "http://localhost:5000/admin/update-role",
+        `${API_URL}/admin/update-role`,
         { userId, newRole },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -124,7 +124,7 @@ export default function AdminPage() {
     const token = await auth.currentUser.getIdToken();
     try {
       await axios.put(
-        `http://localhost:5000/admin/companies/${company.id}/approve`,
+        `${API_URL}/admin/companies/${company.id}/approve`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -139,7 +139,7 @@ export default function AdminPage() {
     const token = await auth.currentUser.getIdToken();
     try {
       await axios.put(
-        `http://localhost:5000/admin/companies/${company.id}/reject`,
+        `${API_URL}/admin/companies/${company.id}/reject`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );

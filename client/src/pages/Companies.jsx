@@ -38,7 +38,7 @@ export default function Companies() {
 
   const fetchCompanies = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/companies");
+      const response = await axios.get(`${API_URL}/companies`);
       setCompanies(response.data.companies || []);
     } catch (error) {
       console.error("Error fetching companies:", error);

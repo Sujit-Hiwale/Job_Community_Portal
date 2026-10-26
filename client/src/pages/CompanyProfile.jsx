@@ -37,7 +37,7 @@ export default function CompanyProfile() {
   const fetchCompanyData = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/company/${companyId}`
+        `${API_URL}/company/${companyId}`
       );
       setCompany(response.data);
       setFollowersCount(response.data.followers || 0);
@@ -52,7 +52,7 @@ export default function CompanyProfile() {
   const fetchCompanyJobs = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/jobs?companyId=${companyId}`
+        `${API_URL}/jobs?companyId=${companyId}`
       );
       setJobs(response.data.jobs || []);
     } catch (error) {
@@ -96,10 +96,10 @@ export default function CompanyProfile() {
   const handleFollowToggle = async () => {
     try {
       if (isFollowing) {
-        await axios.post(`http://localhost:5000/company/${companyId}/unfollow`);
+        await axios.post(`${API_URL}/company/${companyId}/unfollow`);
         setFollowersCount((prev) => prev - 1);
       } else {
-        await axios.post(`http://localhost:5000/company/${companyId}/follow`);
+        await axios.post(`${API_URL}/company/${companyId}/follow`);
         setFollowersCount((prev) => prev + 1);
       }
       setIsFollowing(!isFollowing);

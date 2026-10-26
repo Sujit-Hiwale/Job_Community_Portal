@@ -46,7 +46,7 @@ function BookMeeting() {
 
       const token = await currentUser.getIdToken();
 
-      const res = await fetch("http://localhost:5000/user/profile", {
+      const res = await fetch(`${API_URL}/user/profile`, {
         headers: {
           "Authorization": `Bearer ${token}`
         }
@@ -75,7 +75,7 @@ function BookMeeting() {
     try {
       const token = await currentUser.getIdToken(); // << GET TOKEN
 
-      const response = await fetch("http://localhost:5000/meeting-request", {
+      const response = await fetch(`${API_URL}/meeting-request`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

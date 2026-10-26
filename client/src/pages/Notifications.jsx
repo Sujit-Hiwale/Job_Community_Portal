@@ -21,7 +21,7 @@ export default function Notifications() {
       try {
         const token = await currentUser.getIdToken(true);
 
-        const res = await fetch("http://localhost:5000/notifications", {
+        const res = await fetch(`${API_URL}/notifications`, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -54,7 +54,7 @@ export default function Notifications() {
   const markAsRead = async (id) => {
     const token = await currentUser.getIdToken();
 
-    await fetch(`http://localhost:5000/notifications/${id}/read`, {
+    await fetch(`${API_URL}/notifications/${id}/read`, {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${token}`,

@@ -20,7 +20,7 @@ function Header() {
     const fetchUnreadCount = async () => {
       try {
         const token = await currentUser.getIdToken();
-        const res = await fetch("http://localhost:5000/notifications/unread-count", {
+        const res = await fetch(`${API_URL}/notifications/unread-count`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const data = await res.json();
@@ -43,7 +43,7 @@ function Header() {
     const fetchNotifications = async () => {
       try {
         const token = await currentUser.getIdToken();
-        const res = await fetch("http://localhost:5000/notifications", {
+        const res = await fetch(`${API_URL}/notifications`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const data = await res.json();
