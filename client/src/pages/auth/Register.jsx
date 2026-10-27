@@ -8,7 +8,7 @@ import {
   signInWithPopup,
 } from "firebase/auth";
 import { auth } from "../../firebase/firebaseConfig.js";
-import { API_URL } from "../config/api";
+import { API_URL } from "../../config/api";
 
 function Register() {
   const [formData, setFormData] = useState({
